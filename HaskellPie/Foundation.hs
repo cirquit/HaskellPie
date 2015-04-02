@@ -24,6 +24,14 @@ data App = App
     , appLogger      :: Logger
     }
 
+-- | i18n support
+
+mkMessage "App" "messages" "en"
+
+plural :: Int -> String -> String -> String
+plural 1 x _ = x
+plural _ _ y = y
+
 instance HasHttpManager App where
     getHttpManager = appHttpManager
 
@@ -64,6 +72,7 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_bootstrap_css
+            setTitle "HaskellPie - That Haskell Site"
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 

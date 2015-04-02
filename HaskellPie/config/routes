@@ -4,4 +4,12 @@
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
-/ HomeR GET POST
+/ HomeR GET
+/blog/ BlogR GET
+/tutorials/ TutorialsR GET
+/forum/ ForumR GET
+/contact/ ContactR GET
+/signup/ SignUpR GET POST
+/login/ LogInR GET POST
+/account/ AccountR GET POST
+/logout/ LogOutR GET

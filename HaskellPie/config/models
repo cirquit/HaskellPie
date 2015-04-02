@@ -8,5 +8,14 @@ Email
     user UserId Maybe
     verkey Text Maybe
     UniqueEmail email
-
+Person
+    nick Text
+    password Text
+    email Text Maybe
+    info Info
+    UniqueNick nick
+Info
+    subject Text Maybe
+    degree  Text Maybe
+    semesterCount Int Maybe
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)

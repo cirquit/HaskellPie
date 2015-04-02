@@ -20,6 +20,17 @@ library
                      Settings.StaticFiles
                      Handler.Common
                      Handler.Home
+                     Handler.Blog
+                     Handler.Tutorials
+                     Handler.Forum
+                     Handler.Contact
+                     Handler.SignUp
+                     Handler.LogIn
+                     Handler.Account
+                     Handler.LogOut
+                     Widgets
+                     CustomForms
+                     Helper
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -79,6 +90,7 @@ library
                  , containers
                  , vector
                  , time
+                 , pwstore-fast                  >=2.4.4
 
 executable         HaskellPie
     if flag(library-only)
@@ -125,3 +137,4 @@ test-suite test
                  , hspec
                  , classy-prelude
                  , classy-prelude-yesod
+                 , pwstore-fast                  >=2.4.4
