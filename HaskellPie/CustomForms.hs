@@ -19,8 +19,8 @@ lengthTextField msg = checkBool (\x -> ((length x) <= 200) && noSpaceList x) msg
 -- | Custom password field
 --   Always required
 --   made to fit in a table
-confirmPasswordField :: Field Handler Text
-confirmPasswordField = Field
+initPasswordField :: Field Handler Text
+initPasswordField = Field
     { fieldParse = \rawVals _fileVals ->
         case rawVals of
             [a, b]
@@ -39,6 +39,11 @@ confirmPasswordField = Field
     , fieldEnctype = UrlEncoded
     }
 
+-- | Custom update password field
+--   Current password always required
+--   If passwords match and second & third field is empty, return current password
+--   If passwords match and second & third field match, return new password
+--   made to fit a table
 updatePasswordField :: Text -> Field Handler Text
 updatePasswordField oldpw = Field
     { fieldParse = \rawVals _fileVals ->

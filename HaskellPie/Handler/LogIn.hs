@@ -2,7 +2,7 @@ module Handler.LogIn where
 
 import Import
 import Widgets (accountLinksW)
-import Helper -- (LoginData, passwordsMatch)
+import Helper
 
 getLogInR :: Handler Html
 getLogInR = do
@@ -12,7 +12,6 @@ getLogInR = do
       (_)      -> do
           (widget, enctype) <- generateFormPost signupMForm
           let content = [whamlet|
-              <div style="margin:30px 0px 0px 15px;">
                   <form method=post enctype=#{enctype}>
                       ^{widget}
                         |]
@@ -25,12 +24,11 @@ postLogInR = do
         (FormSuccess (LoginData nick pw))   -> do
             mperson <- runDB $ getBy $ UniqueNick nick
             case mperson of
-                (passwordsMatch pw -> True) -> do
+                (passwordsEntityMatch pw -> True) -> do
                     setSession "_ID" nick
                     redirectUltDest HomeR
                 (_)                         -> do
                     let content = [whamlet|
-                        <div style="margin:30px 0px 0px 15px;">
                             <span class=simpleBlack> Something doesn't match up, please try again.
                             <form method=post enctype=#{enctype}>
                                 ^{widget}
@@ -38,7 +36,6 @@ postLogInR = do
                     defaultLayout $(widgetFile "login")
         (_)                                 -> do
             let content = [whamlet|
-                <div style="margin:30px 0px 0px 15px;">
                     <span class=simpleBlack> Something doesn't match up, please try again.
                     <form method=post enctype=#{enctype}>
                         ^{widget}

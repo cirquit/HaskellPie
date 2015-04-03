@@ -14,6 +14,7 @@ accountLinksW = do
     case mnick of
         (Just nick) -> [whamlet|
             <a class="login" href=@{LogOutR}> Log out
+            <a class="login" href=@{DeleteAccountR}> Delete account
             <a class="login" href=@{AccountR}> #{nick}
                        |]
         (_)         -> [whamlet|

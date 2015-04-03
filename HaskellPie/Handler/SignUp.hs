@@ -2,7 +2,7 @@ module Handler.SignUp where
 
 import Import
 import Helper (dupe)
-import CustomForms (lengthTextField, confirmPasswordField)
+import CustomForms (lengthTextField, initPasswordField)
 import Widgets (accountLinksW)
 --import Crypto.PasswordStore (makePassword)
 
@@ -15,7 +15,6 @@ getSignUpR = do
         (_)         -> do
             (widget, enctype) <- generateFormPost signupMForm
             let content = [whamlet|
-                <div style="margin:30px 0px 0px 15px;">
                     <span class=simpleBlack> You can create an account here!
                     <form method=post enctype=#{enctype}>
                         ^{widget}
@@ -31,7 +30,6 @@ postSignUpR = do
             case mnick of
                 (Just _) -> do
                     let content = [whamlet|
-                        <div style="margin:30px 0px 0px 15px;">
                             <span class=simpleBlack> This username is already taken, sorry.
                             <form method=post enctype=#{enctype}>
                                 ^{widget}
@@ -40,19 +38,9 @@ postSignUpR = do
                 (_)      -> do
                     (_) <- runDB $ insert (Person nick pw email (Info subject degree semCountResult))
                     setSession "_ID" nick
-                    let content = [whamlet|
-                        <div style="margin:30px 0px 0px 15px;">
-                            <span> #{show nick}
-                            <span> #{show pw}
-                            <span> #{show email}
-                            <span> #{show subject}
-                            <span> #{show degree}
-                            <span> #{show semCountResult}
-                                  |]
-                    defaultLayout $(widgetFile "signup")
+                    redirectUltDest HomeR
         (FormFailure (err:_)) -> do
             let content = [whamlet|
-                <div style="margin:30px 0px 0px 15px;">
                     <span class=simpleBlack> #{err}
                     <form method=post enctype=#{enctype}>
                         ^{widget}
@@ -72,7 +60,7 @@ postSignUpR = do
 signupMForm :: Form Person
 signupMForm token = do
     (nickResult, nickView)         <- mreq (lengthTextField MsgNickError) "" Nothing
-    (passwordResult, passwordView) <- mreq confirmPasswordField  "" Nothing
+    (passwordResult, passwordView) <- mreq initPasswordField  "" Nothing
     (emailResult, emailView)       <- mopt emailField "" Nothing
     (subjectResult, subjectView)   <- mopt (lengthTextField  MsgSubjectError) "" Nothing
     (degreeResult, degreeView)     <- mopt (selectFieldList [dupe ("Student"::Text), dupe ("Bachelor"::Text) , dupe ("Master"::Text), dupe ("Other"::Text)]) "" Nothing

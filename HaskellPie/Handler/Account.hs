@@ -1,7 +1,7 @@
 module Handler.Account where
 
 import Import
-import Widgets (accountLinksW, )
+import Widgets (accountLinksW)
 import CustomForms (updatePasswordField, lengthTextField)
 import Helper (dupe)
 
