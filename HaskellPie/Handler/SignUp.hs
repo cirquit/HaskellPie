@@ -19,7 +19,7 @@ getSignUpR = do
                     <form method=post enctype=#{enctype}>
                         ^{widget}
                           |]
-            defaultLayout $(widgetFile "signup")
+            defaultLayout $(widgetFile "homepage")
 
 postSignUpR :: Handler Html
 postSignUpR = do
@@ -34,7 +34,7 @@ postSignUpR = do
                             <form method=post enctype=#{enctype}>
                                 ^{widget}
                                   |]
-                    defaultLayout $(widgetFile "signup")
+                    defaultLayout $(widgetFile "homepage")
                 (_)      -> do
                     (_) <- runDB $ insert (Person nick pw email (Info subject degree semCountResult))
                     setSession "_ID" nick
@@ -45,7 +45,7 @@ postSignUpR = do
                     <form method=post enctype=#{enctype}>
                         ^{widget}
                           |]
-            defaultLayout $(widgetFile "signup")
+            defaultLayout $(widgetFile "homepage")
         (_) -> do
             let content = [whamlet|
                 <div style="margin:30px 0px 0px 15px;">
@@ -53,7 +53,7 @@ postSignUpR = do
                     <form method=post enctype=#{enctype}>
                         ^{widget}
                           |]
-            defaultLayout $(widgetFile "signup")
+            defaultLayout $(widgetFile "homepage")
 
 
 

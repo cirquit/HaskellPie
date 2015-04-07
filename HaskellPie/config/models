@@ -18,4 +18,15 @@ Info
     subject Text Maybe
     degree  Text Maybe
     semesterCount Int Maybe
- -- By default this file is used in Model.hs (which is imported by Foundation.hs)
+Thread
+    name Text
+    UniqueName name
+    posts [Post] Maybe
+    time UTCTime default=CURRENT_TIME
+    creator Person Maybe
+    group Text
+Post
+    creator Person Maybe
+    time UTCTime default=CURRENT_TIME
+    content Text
+-- By default this file is used in Model.hs (which is imported by Foundation.hs)

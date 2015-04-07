@@ -15,7 +15,7 @@ getLogInR = do
                   <form method=post enctype=#{enctype}>
                       ^{widget}
                         |]
-          defaultLayout $(widgetFile "login")
+          defaultLayout $(widgetFile "homepage")
 
 postLogInR :: Handler Html
 postLogInR = do
@@ -33,14 +33,14 @@ postLogInR = do
                             <form method=post enctype=#{enctype}>
                                 ^{widget}
                                   |]
-                    defaultLayout $(widgetFile "login")
+                    defaultLayout $(widgetFile "homepage")
         (_)                                 -> do
             let content = [whamlet|
                     <span class=simpleBlack> Something doesn't match up, please try again.
                     <form method=post enctype=#{enctype}>
                         ^{widget}
                           |]
-            defaultLayout $(widgetFile "login")
+            defaultLayout $(widgetFile "homepage")
 
 signupMForm :: Form LoginData
 signupMForm token = do

@@ -4,4 +4,6 @@ import Import
 import Widgets (accountLinksW)
 
 getForumR :: Handler Html
-getForumR = defaultLayout $(widgetFile "forum")
+getForumR = do
+    let content = [whamlet|<span>|]
+    defaultLayout $(widgetFile "homepage")

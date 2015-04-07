@@ -21,7 +21,7 @@ getDeleteAccountR = do
                                     <form method=post enctype=#{enctype}>
                                         ^{widget}
                                   |]
-                    defaultLayout $(widgetFile "deleteaccount")
+                    defaultLayout $(widgetFile "homepage")
                 (_)                      -> do
                     setUltDestCurrent
                     deleteSession "_ID"
@@ -54,7 +54,7 @@ postDeleteAccountR = do
                                             <form method=post enctype=#{enctype}>
                                                 ^{widget}
                                           |]
-                            defaultLayout $(widgetFile "deleteaccount")
+                            defaultLayout $(widgetFile "homepage")
                         (_)                           -> do
                             let content = [whamlet|
                                 <div style="margin 30px 0px 0px 15px">
@@ -64,7 +64,7 @@ postDeleteAccountR = do
                                             <form method=post enctype=#{enctype}>
                                                 ^{widget}
                                           |]
-                            defaultLayout $(widgetFile "deleteaccount")
+                            defaultLayout $(widgetFile "homepage")
                 (_)                        -> do
                     deleteSession "_ID"
                     redirect LogInR

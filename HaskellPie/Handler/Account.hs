@@ -20,7 +20,7 @@ getAccountR = do
                             <form method=post enctype=#{enctype}>
                                 ^{widget}
                                   |]
-                    defaultLayout $(widgetFile "account")
+                    defaultLayout $(widgetFile "homepage")
                 (_)                      -> do
                     deleteSession "_ID"
                     redirect LogInR
@@ -42,7 +42,7 @@ postAccountR = do
                                 <div style="margin:30px 0px 0px 15px;">
                                     <span class=simpleBlack> Your information was updated
                                           |]
-                            defaultLayout $(widgetFile "account")
+                            defaultLayout $(widgetFile "homepage")
                         (FormFailure (err:_))   -> do
                             let content = [whamlet|
                                 <div style="margin:30px 0px 0px 15px;">
@@ -50,7 +50,7 @@ postAccountR = do
                                     <form method=post enctype=#{enctype}>
                                         ^{widget}
                                           |]
-                            defaultLayout $(widgetFile "login")
+                            defaultLayout $(widgetFile "homepage")
                         (_)                     -> do
                             let content = [whamlet|
                                   <div style="margin:30px 0px 0px 15px;">
@@ -58,7 +58,7 @@ postAccountR = do
                                       <form method=post enctype=#{enctype}>
                                           ^{widget}
                                             |]
-                            defaultLayout $(widgetFile "login")
+                            defaultLayout $(widgetFile "homepage")
                 (_) -> do
                     deleteSession "_ID"
                     redirect LogInR

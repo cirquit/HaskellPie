@@ -24,3 +24,9 @@ yesod-devel/
 cabal.sandbox.config
 .DS_Store
 *.swp
+dist/*
+HaskellPie/dist/*
+*.a
+*.hi
+*.dyn_hi
+*.dyn_o

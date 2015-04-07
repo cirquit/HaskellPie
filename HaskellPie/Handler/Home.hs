@@ -4,4 +4,6 @@ import Import
 import Widgets (accountLinksW)
 
 getHomeR :: Handler Html
-getHomeR = defaultLayout $(widgetFile "homepage")
+getHomeR = do
+    let content = [whamlet|<span>|]
+    defaultLayout $(widgetFile "homepage")

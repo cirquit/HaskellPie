@@ -4,4 +4,6 @@ import Import
 import Widgets (accountLinksW)
 
 getBlogR :: Handler Html
-getBlogR = defaultLayout $(widgetFile "blog")
+getBlogR = do
+    let content = [whamlet|<span>|]
+    defaultLayout $(widgetFile "homepage")
