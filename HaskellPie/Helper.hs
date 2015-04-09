@@ -78,7 +78,4 @@ isPostAuthor thread n = do
         (_, _)                              -> return False
 
 deleteByIndex :: [a] -> Int -> [a]
-deleteByIndex []                   _ = []
-deleteByIndex ls (\x -> 0>x -> True) = ls
-deleteByIndex (_:ls)               0 = ls
-deleteByIndex (l:ls)               n = deleteByIndex ls (n-1) ++ [l]
+deleteByIndex xs i = take i xs ++ drop (i+1) xs
