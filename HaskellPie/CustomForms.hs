@@ -84,19 +84,20 @@ updatePasswordField oldpw = Field
 
 
 postMForm :: Text -> Maybe Html -> Form (Maybe Person -> Post)
-postMForm text mayHTML token = do
+postMForm text mHTML token  = do
   time <- liftIO $ getCurrentTime
-  (contentResult, contentView) <- mreq nicHtmlField "" mayHTML
+  (contentResult, contentView) <- mreq nicHtmlField "" mHTML
   let post = Post <$> contentResult <*> pure time
       widget = [whamlet|
               #{token}
                    ^{fvInput contentView}
-                  <input type=submit value="#{text}"">
+                  <input type=submit value=#{text}>
                   <br>
               <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
               <br>
-              <label> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
-              <label> <a href=lpaste.net> For larger files </a>
+              <div style="width:100%; height:30px;">
+                <label style="float:left;"> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
+                <label style="float:right;"> <a href=lpaste.net> For larger files </a>
                |] >> toWidget [lucius|
                        ##{fvId contentView} {
                            width:100%;
@@ -104,3 +105,30 @@ postMForm text mayHTML token = do
                        }
                                 |]
   return (post, widget)
+
+
+threadMForm :: Text -> Maybe Text -> Maybe Html -> Form (Maybe Person -> Thread)
+threadMForm text mTitle mHTML token = do
+    time <- liftIO $ getCurrentTime
+    (titleResult, titleView) <- mreq (lengthTextField MsgSubjectError) "" mTitle
+    (contentResult, contentView) <- mreq nicHtmlField "" mHTML
+    let thread = Thread <$> titleResult <*> contentResult <*> (pure Nothing) <*> (pure time) <*> (pure time)
+        widget = [whamlet|
+            #{token}
+                ^{fvInput titleView}
+                ^{fvInput contentView}
+                <input type=submit value="#{text}">
+            <br>
+            <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
+            <label> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
+            <label> <a href=lpaste.net> For larger files </a>
+                 |] >> toWidget [lucius|
+                       ##{fvId contentView} {
+                           width:100%;
+                           height:200px;
+                       }
+                       ##{fvId titleView} {
+                          width:100%;
+                       }
+                                |]
+    return (thread, widget)

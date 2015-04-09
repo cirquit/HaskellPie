@@ -2,15 +2,14 @@ module Handler.Forum where
 
 import Import
 import Widgets (accountLinksW, postWidget, threadListWidget)
-import CustomForms (lengthTextField)
+import CustomForms (threadMForm)
 import Helper (spacesToMinus, getPersonBySession)
-import Yesod.Form.Nic (nicHtmlField)
 
 
 getForumR :: Handler Html
 getForumR = do
     allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
-    (widget, enctype) <- generateFormPost $ threadMForm
+    (widget, enctype) <- generateFormPost $ threadMForm "Create thread" Nothing Nothing
     let headline = "Forum" :: Text
     let leftWidget = threadListWidget allThreads
     let rightWidget = postWidget enctype widget
@@ -18,7 +17,7 @@ getForumR = do
 
 postForumR :: Handler Html
 postForumR = do
-    ((result, widget), enctype) <- runFormPost $ threadMForm
+    ((result, widget), enctype) <- runFormPost $ threadMForm "Create thread" Nothing Nothing
     user <- runDB $ getPersonBySession
     case result of
         (FormSuccess mthread) -> do
@@ -48,29 +47,3 @@ postForumR = do
             let leftWidget = threadListWidget allThreads
             let rightWidget = [whamlet|<span .simpleBlack> Error: Something went wrong, please try again |] >> postWidget enctype widget
             defaultLayout $(widgetFile "forum")
-
-threadMForm :: Form (Maybe Person -> Thread)
-threadMForm token = do
-    time <- liftIO $ getCurrentTime
-    (titleResult, titleView) <- mreq (lengthTextField MsgSubjectError) "" Nothing
-    (contentResult, contentView) <- mreq nicHtmlField "" Nothing
-    let thread = Thread <$> titleResult <*> contentResult <*> (pure Nothing) <*> (pure time) <*> (pure time)
-        widget = [whamlet|
-            #{token}
-                ^{fvInput titleView}
-                ^{fvInput contentView}
-                <input type=submit value="Create thread">
-            <br>
-            <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
-            <label> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
-            <label> <a href=lpaste.net> For larger files </a>
-                 |] >> toWidget [lucius|
-                       ##{fvId contentView} {
-                           width:100%;
-                           height:200px;
-                       }
-                       ##{fvId titleView} {
-                          width:100%;
-                       }
-                                |]
-    return (thread, widget)

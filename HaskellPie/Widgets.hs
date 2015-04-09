@@ -36,6 +36,7 @@ threadWidget tid thread = do
             <span .simpleTime>#{formatDateStr $ show $ threadTime thread}
             $maybe person <- threadCreator thread
                 $if nick == (personNick person)
+                    <a href=@{EditThreadR tid}> Edit thread
                     <a href=@{DeleteThreadR tid}> Delete thread
                 $else
             $nothing
@@ -49,8 +50,8 @@ threadWidget tid thread = do
                         <span .simpleTime> #{formatDateStr $ show $ postTime post}
                         $maybe person <- postCreator post
                             $if nick == (personNick person)
-                                <a href=@{DeletePostR tid n}> Delete
                                 <a href=@{EditPostR tid n}> Edit
+                                <a href=@{DeletePostR tid n}> Delete
                             $else
                         $nothing
                         <br>
