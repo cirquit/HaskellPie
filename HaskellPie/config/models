@@ -19,14 +19,16 @@ Info
     degree  Text Maybe
     semesterCount Int Maybe
 Thread
-    name Text
-    UniqueName name
+    title Text
+    UniqueTitle title
+    content Html
     posts [Post] Maybe
     time UTCTime default=CURRENT_TIME
     creator Person Maybe
-    group Text
+    deriving
 Post
-    creator Person Maybe
+    content Html
     time UTCTime default=CURRENT_TIME
-    content Text
+    creator Person Maybe
+    deriving
 -- By default this file is used in Model.hs (which is imported by Foundation.hs)

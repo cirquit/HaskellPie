@@ -11,6 +11,7 @@ import Yesod.Auth
 import Yesod.Auth.BrowserId (authBrowserId)
 import Yesod.Core.Types     (Logger)
 import Yesod.Default.Util   (addStaticContentExternal)
+import Yesod.Form.Nic (YesodNic)
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -114,6 +115,11 @@ instance Yesod App where
 
     makeLogger = return . appLogger
 
+    -- custom 404
+    errorHandler NotFound = redirect ErrorR
+    errorHandler _ = redirect ErrorR
+    --errorHandler other = defaultErrorHandler other
+
 -- How to run database actions.
 instance YesodPersist App where
     type YesodPersistBackend App = SqlBackend
@@ -162,3 +168,5 @@ instance RenderMessage App FormMessage where
 -- https://github.com/yesodweb/yesod/wiki/Sending-email
 -- https://github.com/yesodweb/yesod/wiki/Serve-static-files-from-a-separate-domain
 -- https://github.com/yesodweb/yesod/wiki/i18n-messages-in-the-scaffolding
+
+instance YesodNic App

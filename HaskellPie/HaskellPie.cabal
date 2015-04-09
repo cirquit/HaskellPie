@@ -29,6 +29,9 @@ library
                      Handler.Account
                      Handler.LogOut
                      Handler.DeleteAccount
+                     Handler.Thread
+                     Handler.Error
+                     Handler.DeletePost
                      Widgets
                      CustomForms
                      Helper
@@ -92,6 +95,7 @@ library
                  , vector
                  , time
                  , pwstore-fast                  >=2.4.4
+                 , old-locale                    >=1.0.0.6
 
 executable         HaskellPie
     if flag(library-only)
@@ -139,3 +143,4 @@ test-suite test
                  , classy-prelude
                  , classy-prelude-yesod
                  , pwstore-fast                  >=2.4.4
+                 , old-locale                    >=1.0.0.6

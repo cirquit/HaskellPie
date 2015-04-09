@@ -112,6 +112,13 @@
   (major1) == 0 && (major2) <  3 || \
   (major1) == 0 && (major2) == 3 && (minor) <= 10)
 
+/* package old-locale-1.0.0.6 */
+#define VERSION_old_locale "1.0.0.6"
+#define MIN_VERSION_old_locale(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  0 || \
+  (major1) == 1 && (major2) == 0 && (minor) <= 0)
+
 /* package persistent-2.1.1 */
 #define VERSION_persistent "2.1.1"
 #define MIN_VERSION_persistent(major1,major2,minor) (\

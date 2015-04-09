@@ -10,5 +10,7 @@
             <li> <a href=@{ForumR}> Forum         </a>
             <li> <a href=@{ContactR}> Contact     </a>
     <div id="main_content">
-        <div id="err_margin">
-        ^{content}
+            <div id="err_margin">
+            <div id="title"> <p class=simpleTitle> #{headline} </p>
+            <div id="left">  ^{leftWidget}
+            <div id="right"> ^{rightWidget}

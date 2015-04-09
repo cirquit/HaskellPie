@@ -1,0 +1,3 @@
+var leftWidgetHeight = document.getElementById('left').offsetHeight;
+
+document.getElementById('main_content').style.height = leftWidgetHeight+73+'px';

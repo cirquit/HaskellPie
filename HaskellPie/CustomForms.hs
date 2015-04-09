@@ -12,8 +12,27 @@ unsignedIntField msg = checkBool (>=0) msg intField
 lengthTextField ::( RenderMessage (HandlerSite m) FormMessage
                    , RenderMessage (HandlerSite m) msg, Monad m )
                => msg -> Field m Text
-lengthTextField msg = checkBool (\x -> ((length x) <= 200) && noSpaceList x) msg textField
+lengthTextField msg = checkBool (\x -> ((length x) <= 200) && noSpaceList x) msg titleField
     where noSpaceList l = not $ all (==' ') l
+
+
+titleField :: Monad m => RenderMessage (HandlerSite m) FormMessage => Field m Text
+titleField = Field
+    { fieldParse = parseHelper $ Right
+    , fieldView = \theId name attrs val isReq ->
+        [whamlet|
+$newline never
+<input id="#{theId}" name="#{name}" *{attrs} type="text" :isReq:required value="#{either id id val}" placeholder="Enter your title">
+|]
+    , fieldEnctype = UrlEncoded
+    }
+
+
+
+
+
+
+
 
 
 -- | Custom password field

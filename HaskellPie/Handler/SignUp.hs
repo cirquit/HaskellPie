@@ -15,7 +15,7 @@ getSignUpR = do
         (_)         -> do
             (widget, enctype) <- generateFormPost signupMForm
             let content = [whamlet|
-                    <span class=simpleBlack> You can create an account here!
+                    <span .simpleBlack> You can create an account here!
                     <form method=post enctype=#{enctype}>
                         ^{widget}
                           |]
@@ -30,7 +30,7 @@ postSignUpR = do
             case mnick of
                 (Just _) -> do
                     let content = [whamlet|
-                            <span class=simpleBlack> This username is already taken, sorry.
+                            <span .simpleBlack> This username is already taken, sorry.
                             <form method=post enctype=#{enctype}>
                                 ^{widget}
                                   |]
@@ -41,7 +41,7 @@ postSignUpR = do
                     redirectUltDest HomeR
         (FormFailure (err:_)) -> do
             let content = [whamlet|
-                    <span class=simpleBlack> #{err}
+                    <span .simpleBlack> #{err}
                     <form method=post enctype=#{enctype}>
                         ^{widget}
                           |]
@@ -49,7 +49,7 @@ postSignUpR = do
         (_) -> do
             let content = [whamlet|
                 <div style="margin:30px 0px 0px 15px;">
-                    <span class=simpleBlack> Some error happend, please try again!
+                    <span .simpleBlack> Some error happend, please try again!
                     <form method=post enctype=#{enctype}>
                         ^{widget}
                           |]
@@ -59,10 +59,10 @@ postSignUpR = do
 
 signupMForm :: Form Person
 signupMForm token = do
-    (nickResult, nickView)         <- mreq (lengthTextField MsgNickError) "" Nothing
+    (nickResult, nickView)         <- mreq textField "" Nothing
     (passwordResult, passwordView) <- mreq initPasswordField  "" Nothing
     (emailResult, emailView)       <- mopt emailField "" Nothing
-    (subjectResult, subjectView)   <- mopt (lengthTextField  MsgSubjectError) "" Nothing
+    (subjectResult, subjectView)   <- mopt textField "" Nothing
     (degreeResult, degreeView)     <- mopt (selectFieldList [dupe ("Student"::Text), dupe ("Bachelor"::Text) , dupe ("Master"::Text), dupe ("Other"::Text)]) "" Nothing
     (semCountResult, semCountView) <- mopt (selectFieldList [(pack (show x)::Text,x) | x <- [1..20]]) "" Nothing
     let degree = Info <$> subjectResult <*> degreeResult <*> semCountResult

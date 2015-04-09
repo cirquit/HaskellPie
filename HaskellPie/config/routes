@@ -7,10 +7,13 @@
 / HomeR GET
 /blog/ BlogR GET
 /tutorials/ TutorialsR GET
-/forum/ ForumR GET
+/forum/ ForumR GET POST
 /contact/ ContactR GET
 /signup/ SignUpR GET POST
 /login/ LogInR GET POST
 /account/ AccountR GET POST
 /logout/ LogOutR GET
 /deleteaccount/ DeleteAccountR GET POST
+/thread/#Text ThreadR GET POST
+/error ErrorR GET
+/deletepost/#ThreadId/#Int DeletePostR GET POST

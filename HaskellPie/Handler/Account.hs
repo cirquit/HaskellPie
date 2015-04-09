@@ -16,7 +16,7 @@ getAccountR = do
                     (widget, enctype) <- generateFormPost $ updateAccountInfoMForm person
                     let content = [whamlet|
                         <div style="margin:30px 0px 0px 15px;">
-                            <span class=simpleBlack> You are logged in #{nick}!
+                            <span .simpleBlack> You are logged in #{nick}!
                             <form method=post enctype=#{enctype}>
                                 ^{widget}
                                   |]
@@ -40,13 +40,13 @@ postAccountR = do
                             (_) <- runDB $ replace pid $ newPerson
                             let content = [whamlet|
                                 <div style="margin:30px 0px 0px 15px;">
-                                    <span class=simpleBlack> Your information was updated
+                                    <span .simpleBlack> Your information was updated
                                           |]
                             defaultLayout $(widgetFile "homepage")
                         (FormFailure (err:_))   -> do
                             let content = [whamlet|
                                 <div style="margin:30px 0px 0px 15px;">
-                                    <span class=simpleBlack> #{err}
+                                    <span .simpleBlack> #{err}
                                     <form method=post enctype=#{enctype}>
                                         ^{widget}
                                           |]
@@ -54,7 +54,7 @@ postAccountR = do
                         (_)                     -> do
                             let content = [whamlet|
                                   <div style="margin:30px 0px 0px 15px;">
-                                      <span class=simpleBlack> Something went wrong, please try again
+                                      <span .simpleBlack> Something went wrong, please try again
                                       <form method=post enctype=#{enctype}>
                                           ^{widget}
                                             |]
@@ -77,7 +77,6 @@ updateAccountInfoMForm (Person nick password email (Info subject degree semCount
         person = Person <$> (FormSuccess nick) <*> passwordResult <*> emailResult <*> info
         widget = [whamlet|
     #{token}
-    <div style="margin:15px 0px 0px 15px;">
         <table>
             <tr>
                 ^{fvInput passwordView}
