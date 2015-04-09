@@ -52,22 +52,19 @@ getLatestUpdate (Thread _ _ _ time _ _)         = time
 
 lasts :: [a] -> (a -> b) -> b -> b
 lasts [] _ ifEmpty = ifEmpty
-lasts l f _ = f $ last l
+lasts l  f _       = f $ last l
 
 nickPersonMatch :: (Maybe Text, Maybe Person) -> Bool
 nickPersonMatch ((Just nick),(Just (Person pnick _ _ _))) = nick == pnick
 nickPersonMatch _                                         = False
 
-isPostAuthor :: (Maybe Text, Maybe Post) -> Bool
-isPostAuthor ((Just nick),(Just (Post _ _  (Just (Person pnick _ _ _))))) = nick == pnick
-isPostAuthor _                                                            = False
-
 getPostByIndex :: Thread -> Int -> Maybe Post
-getPostByIndex _              (\x -> x<0 -> True)  = Nothing
-getPostByIndex (Thread _ _ Nothing _ _ _)             _ = Nothing
-getPostByIndex (Thread _ _ (Just []) _ _ _)             _ = Nothing
-getPostByIndex (Thread _ _ (Just (p:_)) _ _ _)         0 = Just p
-getPostByIndex t@(Thread _ _ (Just (_:ps)) _ _ _)       n = getPostByIndex (t {threadPosts = (Just ps)}) (n-1)
+getPostByIndex (Thread _ _ Nothing _ _ _)   _ = Nothing
+getPostByIndex (Thread _ _ (Just ps) _ _ _) i =
+    case splitAt i ps of
+      (_, [])         -> Nothing
+      ([], _) | i < 0 -> Nothing
+      (_,(y:_))      -> Just y
 
 isPostAuthor :: MonadHandler m => Thread -> Int -> m Bool
 isPostAuthor thread n = do
@@ -77,5 +74,23 @@ isPostAuthor thread n = do
         (Just nick, Just (Post _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
         (_, _)                              -> return False
 
+isThreadAuthor :: MonadHandler m => Thread -> m Bool
+isThreadAuthor thread = do
+    mnick <- lookupSession "_ID"
+    case (mnick, thread) of
+        (Just nick, (Thread _ _ _ _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
+        (_, _)                                                      -> return False
+
 deleteByIndex :: [a] -> Int -> [a]
 deleteByIndex xs i = take i xs ++ drop (i+1) xs
+
+getPersonBySession:: MonadHandler m => ReaderT SqlBackend m (Maybe Person)
+getPersonBySession = do
+    mnick <- lookupSession "_ID"
+    case mnick of
+        (Just nick) -> do
+            mperson <- getBy $ UniqueNick nick
+            case mperson of
+               (Just (Entity _ person)) -> return $ Just person
+               (_)               -> return $ Nothing
+        (_)           -> return $ Nothing

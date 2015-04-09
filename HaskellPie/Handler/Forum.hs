@@ -3,7 +3,7 @@ module Handler.Forum where
 import Import
 import Widgets (accountLinksW, postWidget, threadListWidget)
 import CustomForms (lengthTextField)
-import Helper (spacesToMinus)
+import Helper (spacesToMinus, getPersonBySession)
 import Yesod.Form.Nic (nicHtmlField)
 
 
@@ -19,17 +19,10 @@ getForumR = do
 postForumR :: Handler Html
 postForumR = do
     ((result, widget), enctype) <- runFormPost $ threadMForm
-    mnick <- lookupSession "_ID"
-    user <- case mnick of
-                   (Just nick) -> do
-                       mperson <- runDB $ getBy $ UniqueNick nick
-                       case mperson of
-                           (Just (Entity _ person)) -> return $ Just person
-                           (_)                      -> return $ Nothing
-                   (_)         -> return $ Nothing
+    user <- runDB $ getPersonBySession
     case result of
-        (FormSuccess threadWithoutUser) -> do
-            let thread = threadWithoutUser user
+        (FormSuccess mthread) -> do
+            let thread = mthread user
             (mtitle, allThreads) <- runDB $ do
                mtitle <- getBy $ UniqueTitle $ threadTitle thread
                allThreads <- selectList [] [Desc ThreadLastUpdate]

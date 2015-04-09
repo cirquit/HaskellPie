@@ -1,7 +1,7 @@
 module Handler.DeletePost where
 
 import Import
-import Helper (isPostAuthor, getPostByIndex, deleteByIndex)
+import Helper (isPostAuthor, deleteByIndex)
 
 getDeletePostR :: ThreadId -> Int ->  Handler Html
 getDeletePostR tid n = redirectToPost $ DeletePostR tid n

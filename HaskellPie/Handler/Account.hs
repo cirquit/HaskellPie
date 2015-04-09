@@ -3,7 +3,7 @@ module Handler.Account where
 import Import
 import Widgets (accountLinksW, postWidget, threadListWidget)
 import CustomForms (updatePasswordField)
-import Helper (dupe, formatDateStr, spacesToMinus, getLatestUpdate)
+import Helper (dupe)
 
 getAccountR :: Handler Html
 getAccountR = do
