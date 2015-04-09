@@ -1,7 +1,7 @@
 module Handler.EditThread where
 
 import Import
-import Helper (isThreadAuthor)
+import Helper (isThreadAuthor, spacesToMinus)
 import CustomForms (threadMForm)
 import Widgets (threadWidget, postWidget, accountLinksW)
 
@@ -27,9 +27,9 @@ postEditThreadR tid = do
             ((result, widget),enctype)<- runFormPost $ threadMForm "Update thread" (Just $ threadTitle thread) (Just $ threadContent thread)
             case result of
                 (FormSuccess mthread)   -> do
-                    let newThread = mthread Nothing
-                    runDB $ update tid $ [ThreadTitle =. (threadTitle newThread), ThreadContent =. (threadContent newThread)]
-                    redirectUltDest HomeR
+                    let newThread = mthread (threadCreator thread)
+                    runDB $ replace tid $ newThread {threadPosts = (threadPosts thread)}
+                    redirect $ ThreadR (spacesToMinus $ threadTitle newThread)
                 (FormFailure (err:_)) -> do
                     let headline    = threadTitle thread
                         leftWidget  = threadWidget tid thread
