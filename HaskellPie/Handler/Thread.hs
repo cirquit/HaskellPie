@@ -1,14 +1,14 @@
 module Handler.Thread where
 
 import Import
-import Widgets (accountLinksW, postWidget)
-import Helper (minusToSpaces, mayUser, addPost, formatDateStr)
-import Yesod.Form.Nic (nicHtmlField)
+import Widgets (accountLinksW, postWidget, threadWidget)
+import Helper (minusToSpaces, addPost)
+import CustomForms (postMForm)
 
 getThreadR :: Text -> Handler Html
 getThreadR text = do
     setUltDestCurrent
-    (widget, enctype) <- generateFormPost $ postMForm
+    (widget, enctype) <- generateFormPost $ postMForm "Submit post" Nothing
     let completeTitle = minusToSpaces text
     (Entity tid thread) <- runDB $ getBy404 $ UniqueTitle completeTitle
     let headline = threadTitle thread
@@ -29,8 +29,8 @@ postThreadR text = do
                           (_)               -> return $ Nothing
                    (_)           -> return $ Nothing
     let oldPosts = threadPosts thread
-    ((result, widget), enctype) <- runFormPost $ postMForm
-    (nwidget, nenctype)         <- generateFormPost $ postMForm
+    ((result, widget), enctype) <- runFormPost $ postMForm "Submit post" Nothing
+    (nwidget, nenctype)         <- generateFormPost $ postMForm "Submit post" Nothing
     case result of
         (FormSuccess mpost)   -> do
             let post = mpost user
@@ -52,59 +52,3 @@ postThreadR text = do
                 leftWidget  = threadWidget tid thread
                 rightWidget = [whamlet|<span .simpleBlack> Something went wrong, please try again|] >> postWidget enctype widget
             defaultLayout $(widgetFile "forum")
-
-postMForm :: Form (Maybe Person -> Post)
-postMForm token = do
-  time <- liftIO $ getCurrentTime
-  (contentResult, contentView) <- mreq nicHtmlField "" Nothing
-  let post = Post <$> contentResult <*> pure time
-      widget = [whamlet|
-              #{token}
-                   ^{fvInput contentView}
-                  <input type=submit value="Submit post">
-                  <br>
-              <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
-              <br>
-              <label> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
-              <label> <a href=lpaste.net> For larger files </a>
-               |] >> toWidget [lucius|
-                       ##{fvId contentView} {
-                           width:100%;
-                           height:200px;
-                       }
-                                |]
-  return (post, widget)
-
-
-threadWidget :: ThreadId -> Thread -> Widget
-threadWidget tid thread = do
-   mnick <- lookupSession "_ID"
-   nick <-  case mnick of
-              (Just nick) -> return $ nick
-              (_)         -> return $ ""
-   let enum = [0..]::[Int]
-   [whamlet|
-        <div .thread_answer>
-            <span .simpleCreator> #{mayUser $ threadCreator thread}
-            <span .simpleTime>#{formatDateStr $ show $ threadTime thread}
-            $maybe person <- threadCreator thread
-                $if nick == (personNick person)
-                    <a href=@{DeleteThreadR tid}> Delete thread
-                $else
-            $nothing
-            <br>
-            <span> #{threadContent thread}
-    $maybe posts <- threadPosts thread
-        $with enum_posts <- (zip enum posts)
-            $forall (n, post) <- enum_posts
-                <div .thread_answer>
-                        <span .simpleCreator> #{mayUser $ postCreator post}
-                        <span .simpleTime> #{formatDateStr $ show $ postTime post}
-                        $maybe person <- postCreator post
-                            $if nick == (personNick person)
-                                <a href=@{DeletePostR tid n}> Delete
-                            $else
-                        $nothing
-                        <br>
-                        <span> #{postContent post}
-                          |]

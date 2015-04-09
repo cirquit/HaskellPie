@@ -33,6 +33,7 @@ library
                      Handler.Error
                      Handler.DeletePost
                      Handler.DeleteThread
+                     Handler.EditPost
                      Widgets
                      CustomForms
                      Helper

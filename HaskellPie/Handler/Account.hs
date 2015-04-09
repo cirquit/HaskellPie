@@ -1,7 +1,7 @@
 module Handler.Account where
 
 import Import
-import Widgets (accountLinksW, postWidget)
+import Widgets (accountLinksW, postWidget, threadListWidget)
 import CustomForms (updatePasswordField)
 import Helper (dupe, formatDateStr, spacesToMinus, getLatestUpdate)
 
@@ -17,15 +17,7 @@ getAccountR = do
                     (widget, enctype) <- generateFormPost $ updateAccountInfoMForm person
                     let headline = "You are logged in " ++ nick ++ "!"
                         leftWidget = postWidget enctype widget
-                        rightWidget = [whamlet|
-                            <span .simpleBlack> Your threads:
-                            <ul>
-                                $forall (Entity id thread) <- personThreads
-                                    <li>
-                                        <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                                            <label> #{threadTitle thread}
-                                        <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-                                      |]
+                        rightWidget = threadListWidget personThreads
                     defaultLayout $(widgetFile "forum")
                 (_)                      -> do
                     deleteSession "_ID"
@@ -47,41 +39,17 @@ postAccountR = do
                             (_) <- runDB $ replace pid $ newPerson
                             let headline = "Your information was updated!" :: Text
                                 leftWidget = [whamlet| <span> This is the left div|]
-                                rightWidget = [whamlet|
-                                    <span .simpleBlack> Your threads:
-                                    <ul>
-                                        $forall (Entity id thread) <- personThreads
-                                            <li>
-                                                <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                                                    <label> #{threadTitle thread}
-                                                <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-                                              |]
+                                rightWidget = threadListWidget personThreads
                             defaultLayout $(widgetFile "forum")
                         (FormFailure (err:_))   -> do
                             let headline = err
                                 leftWidget = postWidget enctype widget
-                                rightWidget = [whamlet|
-                                    <span .simpleBlack> Your threads:
-                                    <ul>
-                                        $forall (Entity id thread) <- personThreads
-                                            <li>
-                                                <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                                                    <label> #{threadTitle thread}
-                                                <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-                                              |]
+                                rightWidget = threadListWidget personThreads
                             defaultLayout $(widgetFile "forum")
                         (_)                     -> do
                             let headline = "Something went wrong, please try again." :: Text
                                 leftWidget = postWidget enctype widget
-                                rightWidget = [whamlet|
-                                    <span .simpleBlack> Your threads:
-                                    <ul>
-                                        $forall (Entity id thread) <- personThreads
-                                            <li>
-                                                <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                                                    <label> #{threadTitle thread}
-                                                <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-                                              |]
+                                rightWidget = threadListWidget personThreads
                             defaultLayout $(widgetFile "forum")
                 (_) -> do
                     deleteSession "_ID"
@@ -101,7 +69,7 @@ updateAccountInfoMForm (Person nick password email (Info subject degree semCount
         person = Person <$> (FormSuccess nick) <*> passwordResult <*> emailResult <*> info
         widget = [whamlet|
     #{token}
-        <table>
+        <table style="marin: 0px 0px 0px 30px;">
             <tr>
                 ^{fvInput passwordView}
             <tr>

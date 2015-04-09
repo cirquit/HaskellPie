@@ -1,9 +1,9 @@
 module Handler.Forum where
 
 import Import
-import Widgets (accountLinksW, postWidget)
+import Widgets (accountLinksW, postWidget, threadListWidget)
 import CustomForms (lengthTextField)
-import Helper (spacesToMinus, formatDateStr, getLatestUpdate)
+import Helper (spacesToMinus)
 import Yesod.Form.Nic (nicHtmlField)
 
 
@@ -12,14 +12,7 @@ getForumR = do
     allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
     (widget, enctype) <- generateFormPost $ threadMForm
     let headline = "Forum" :: Text
-    let leftWidget = [whamlet|
-        <ul>
-            $forall (Entity id thread) <- allThreads
-                <li>
-                    <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                        <label> #{threadTitle thread}
-                    <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-                     |]
+    let leftWidget = threadListWidget allThreads
     let rightWidget = postWidget enctype widget
     defaultLayout $(widgetFile "forum")
 
@@ -47,40 +40,19 @@ postForumR = do
                     redirect $ ThreadR (spacesToMinus $ threadTitle thread)
                 (_)     -> do
                     let headline = "Forum" :: Text
-                    let leftWidget = [whamlet|
-                        <ul>
-                            $forall (Entity id thread) <- allThreads
-                                <li>
-                                    <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                                        <label> #{threadTitle thread}
-                                    <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-                                  |]
+                    let leftWidget = threadListWidget allThreads
                     let rightWidget = [whamlet|<span .simpleBlack> Error: Sorry, this thread already exists |] >> postWidget enctype widget
                     defaultLayout $(widgetFile "forum")
         (FormFailure (err:_))           -> do
             allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
             let headline = "Forum" :: Text
-            let leftWidget = [whamlet|
-                <ul>
-                    $forall (Entity id thread) <- allThreads
-                        <li>
-                            <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                                <label> #{threadTitle thread}
-                            <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-                             |]
+            let leftWidget = threadListWidget allThreads
             let rightWidget = [whamlet|<span .simpleBlack> Error: #{err} |] >> postWidget enctype widget
             defaultLayout $(widgetFile "forum")
         (_)                             -> do
             allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
             let headline = "Forum" :: Text
-            let leftWidget = [whamlet|
-                <ul>
-                    $forall (Entity id thread) <- allThreads
-                        <li>
-                            <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                                <label> #{threadTitle thread}
-                            <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-                             |]
+            let leftWidget = threadListWidget allThreads
             let rightWidget = [whamlet|<span .simpleBlack> Error: Something went wrong, please try again |] >> postWidget enctype widget
             defaultLayout $(widgetFile "forum")
 

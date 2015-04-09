@@ -53,3 +53,32 @@ getLatestUpdate (Thread _ _ _ time _ _)         = time
 lasts :: [a] -> (a -> b) -> b -> b
 lasts [] _ ifEmpty = ifEmpty
 lasts l f _ = f $ last l
+
+nickPersonMatch :: (Maybe Text, Maybe Person) -> Bool
+nickPersonMatch ((Just nick),(Just (Person pnick _ _ _))) = nick == pnick
+nickPersonMatch _                                         = False
+
+isPostAuthor :: (Maybe Text, Maybe Post) -> Bool
+isPostAuthor ((Just nick),(Just (Post _ _  (Just (Person pnick _ _ _))))) = nick == pnick
+isPostAuthor _                                                            = False
+
+getPostByIndex :: Thread -> Int -> Maybe Post
+getPostByIndex _              (\x -> x<0 -> True)  = Nothing
+getPostByIndex (Thread _ _ Nothing _ _ _)             _ = Nothing
+getPostByIndex (Thread _ _ (Just []) _ _ _)             _ = Nothing
+getPostByIndex (Thread _ _ (Just (p:_)) _ _ _)         0 = Just p
+getPostByIndex t@(Thread _ _ (Just (_:ps)) _ _ _)       n = getPostByIndex (t {threadPosts = (Just ps)}) (n-1)
+
+isPostAuthor :: MonadHandler m => Thread -> Int -> m Bool
+isPostAuthor thread n = do
+    mnick <- lookupSession "_ID"
+    let mpost = getPostByIndex thread n
+    case (mnick, mpost) of
+        (Just nick, Just (Post _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
+        (_, _)                              -> return False
+
+deleteByIndex :: [a] -> Int -> [a]
+deleteByIndex []                   _ = []
+deleteByIndex ls (\x -> 0>x -> True) = ls
+deleteByIndex (_:ls)               0 = ls
+deleteByIndex (l:ls)               n = deleteByIndex ls (n-1) ++ [l]

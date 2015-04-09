@@ -14,10 +14,12 @@ Person
     email Text Maybe
     info Info
     UniqueNick nick
+    deriving Show
 Info
     subject Text Maybe
     degree  Text Maybe
     semesterCount Int Maybe
+    deriving Show
 Thread
     title Text
     UniqueTitle title
