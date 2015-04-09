@@ -81,6 +81,11 @@ threadWidget tid thread = do
         <div .thread_answer>
             <span .simpleCreator> #{mayUser $ threadCreator thread}
             <span .simpleTime>#{formatDateStr $ show $ threadTime thread}
+            $maybe person <- threadCreator thread
+                $if nick == (personNick person)
+                    <a href=@{DeleteThreadR tid}> Delete thread
+                $else
+            $nothing
             <br>
             <span> #{threadContent thread}
     $maybe posts <- threadPosts thread

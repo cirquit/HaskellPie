@@ -17,3 +17,4 @@
 /thread/#Text ThreadR GET POST
 /error ErrorR GET
 /deletepost/#ThreadId/#Int DeletePostR GET POST
+/deletethread/#ThreadId DeleteThreadR GET POST

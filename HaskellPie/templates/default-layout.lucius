@@ -168,7 +168,7 @@ footer{
     /*height: 100%;*/
     background-color: #EEE;
     min-height: 400px;
-    margin: 0px 0px 0px 5px;
+    margin: 0px 5px 0px 5px;
 }
 
 #right {
@@ -177,7 +177,7 @@ footer{
     min-height: 400px;
     /*height:100%;*/
     background-color: #EEE;
-    margin: 0px 5px 0px 0px;
+    margin: 0px 5px 0px 5px;
 }
 
 .thread_answer {
