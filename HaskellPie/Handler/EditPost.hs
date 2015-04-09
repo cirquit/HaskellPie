@@ -7,7 +7,7 @@ import Helper (getPostByIndex, isPostAuthor)
 
 getEditPostR :: ThreadId -> Int -> Handler Html
 getEditPostR tid n = do
-    thread <- runDB $ get404 tid 
+    thread <- runDB $ get404 tid
     let mpost = getPostByIndex thread n
     isAuthor <- isPostAuthor thread n
     case (isAuthor, mpost) of
