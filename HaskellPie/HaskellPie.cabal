@@ -35,6 +35,7 @@ library
                      Handler.DeleteThread
                      Handler.EditPost
                      Handler.EditThread
+                     Handler.User
                      Widgets
                      CustomForms
                      Helper

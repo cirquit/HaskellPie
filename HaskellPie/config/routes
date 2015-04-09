@@ -20,3 +20,4 @@
 /deletethread/#ThreadId DeleteThreadR GET POST
 /editpost/#ThreadId/#Int EditPostR GET POST
 /editthread/#ThreadId EditThreadR GET POST
+/user/#Text UserR GET

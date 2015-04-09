@@ -23,11 +23,6 @@ spacesToMinus ys = pack $ foldr (\x xs -> if x == ' ' then '-':xs else x:xs) [] 
 minusToSpaces :: Text -> Text
 minusToSpaces ys = pack $ foldr (\x xs -> if x == '-' then ' ':xs else x:xs) [] (unpack ys)
 
-mayUser :: Maybe Person -> Text
-mayUser (Just (Person nick _ _ _)) = nick
-mayUser _                         = "Anonymus"
-
-
 addPost :: Maybe [Post] -> Post -> Maybe [Post]
 addPost (Just xs) x = Just (xs ++ [x])
 addPost _         x = Just [x]

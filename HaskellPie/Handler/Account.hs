@@ -17,7 +17,7 @@ getAccountR = do
                     (widget, enctype) <- generateFormPost $ updateAccountInfoMForm person
                     let headline = "You are logged in " ++ nick ++ "!"
                         leftWidget = postWidget enctype widget
-                        rightWidget = threadListWidget personThreads
+                        rightWidget = [whamlet| <span> These are your threads|] >> threadListWidget personThreads
                     defaultLayout $(widgetFile "forum")
                 (_)                      -> do
                     deleteSession "_ID"
@@ -38,8 +38,8 @@ postAccountR = do
                         (FormSuccess newPerson) -> do
                             (_) <- runDB $ replace pid $ newPerson
                             let headline = "Your information was updated!" :: Text
-                                leftWidget = [whamlet| <span> This is the left div|]
-                                rightWidget = threadListWidget personThreads
+                                leftWidget = [whamlet| <span>|]
+                                rightWidget = [whamlet| <span> These are your threads|] >> threadListWidget personThreads
                             defaultLayout $(widgetFile "forum")
                         (FormFailure (err:_))   -> do
                             let headline = err

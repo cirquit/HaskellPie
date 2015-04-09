@@ -1,7 +1,7 @@
 module Widgets where
 
 import Import
-import Helper (mayUser, formatDateStr, getLatestUpdate, spacesToMinus)
+import Helper (formatDateStr, getLatestUpdate, spacesToMinus)
 
 postWidget :: Enctype -> Widget -> Widget
 postWidget enctype widget =  [whamlet|
@@ -32,7 +32,10 @@ threadWidget tid thread = do
    let enum = [0..]::[Int]
    [whamlet|
         <div .thread_answer>
-            <span .simpleCreator> #{mayUser $ threadCreator thread}
+            $maybe (Person pnick _ _ _) <- threadCreator thread
+                 <span .simpleCreator> <a href=@{UserR pnick}> #{pnick} </a>
+            $nothing
+                <span .simpleCreator> Anonymous
             <span .simpleTime>#{formatDateStr $ show $ threadTime thread}
             $maybe person <- threadCreator thread
                 $if nick == (personNick person)
@@ -46,14 +49,15 @@ threadWidget tid thread = do
         $with enum_posts <- (zip enum posts)
             $forall (n, post) <- enum_posts
                 <div .thread_answer>
-                        <span .simpleCreator> #{mayUser $ postCreator post}
+                        $maybe (Person pnick _ _ _)<- threadCreator thread
+                             <span .simpleCreator> <a href=@{UserR pnick}> #{pnick} </a>
+                        $nothing
+                            <span .simpleCreator> Anonymous
                         <span .simpleTime> #{formatDateStr $ show $ postTime post}
                         $maybe person <- postCreator post
                             $if nick == (personNick person)
                                 <a href=@{EditPostR tid n}> Edit
                                 <a href=@{DeletePostR tid n}> Delete
-                            $else
-                        $nothing
                         <br>
                         <span> #{postContent post}
                           |]
@@ -65,6 +69,9 @@ threadListWidget threads = [whamlet|
                 <li>
                     <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
                         <label> #{threadTitle thread}
-                    <span .simpleCreator> #{mayUser $ threadCreator thread}
+                    $maybe (Person nick _ _ _)<- threadCreator thread
+                         <span .simpleCreator> <a href=@{UserR nick}> #{nick} </a>
+                    $nothing
+                        <span .simpleCreator> Anonymous
                     <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
 |]
