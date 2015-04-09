@@ -3,20 +3,23 @@ module Handler.Forum where
 import Import
 import Widgets (accountLinksW, postWidget)
 import CustomForms (lengthTextField)
-import Helper (spacesToMinus)
+import Helper (spacesToMinus, formatDateStr, getLatestUpdate)
 import Yesod.Form.Nic (nicHtmlField)
 
 
 getForumR :: Handler Html
 getForumR = do
-    allThreads <- runDB $ selectList [] [Desc ThreadTime]
+    allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
     (widget, enctype) <- generateFormPost $ threadMForm
     let headline = "Forum" :: Text
     let leftWidget = [whamlet|
         <ul>
             $forall (Entity id thread) <- allThreads
-                <li> <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> <label> #{threadTitle thread} </label> </a>
-                  |]
+                <li>
+                    <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
+                        <label> #{threadTitle thread}
+                    <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
+                     |]
     let rightWidget = postWidget enctype widget
     defaultLayout $(widgetFile "forum")
 
@@ -36,7 +39,7 @@ postForumR = do
             let thread = threadWithoutUser user
             (mtitle, allThreads) <- runDB $ do
                mtitle <- getBy $ UniqueTitle $ threadTitle thread
-               allThreads <- selectList [] [Desc ThreadTime]
+               allThreads <- selectList [] [Desc ThreadLastUpdate]
                return (mtitle, allThreads)
             case mtitle of
                 Nothing -> do
@@ -47,29 +50,36 @@ postForumR = do
                     let leftWidget = [whamlet|
                         <ul>
                             $forall (Entity id thread) <- allThreads
-                                <li> <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> <label> #{threadTitle thread} </label> </a>
-                        <span .simpleBlack> End of all threads
-                        <span .simpleBlack> Error: There is already a thread with this title
+                                <li>
+                                    <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
+                                        <label> #{threadTitle thread}
+                                    <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
                                   |]
-                    let rightWidget = postWidget enctype widget
+                    let rightWidget = [whamlet|<span .simpleBlack> Error: Sorry, this thread already exists |] >> postWidget enctype widget
                     defaultLayout $(widgetFile "forum")
         (FormFailure (err:_))           -> do
-            allThreads <- runDB $ selectList [] [Desc ThreadTime]
+            allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
             let headline = "Forum" :: Text
             let leftWidget = [whamlet|
                 <ul>
                     $forall (Entity id thread) <- allThreads
-                        <li> <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> <label> #{threadTitle thread} </label> </a>
+                        <li>
+                            <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
+                                <label> #{threadTitle thread}
+                            <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
                              |]
             let rightWidget = [whamlet|<span .simpleBlack> Error: #{err} |] >> postWidget enctype widget
             defaultLayout $(widgetFile "forum")
         (_)                             -> do
-            allThreads <- runDB $ selectList [] [Desc ThreadTime]
+            allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
             let headline = "Forum" :: Text
             let leftWidget = [whamlet|
                 <ul>
                     $forall (Entity id thread) <- allThreads
-                        <li> <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> <label> #{threadTitle thread} </label> </a>
+                        <li>
+                            <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
+                                <label> #{threadTitle thread}
+                            <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
                              |]
             let rightWidget = [whamlet|<span .simpleBlack> Error: Something went wrong, please try again |] >> postWidget enctype widget
             defaultLayout $(widgetFile "forum")
@@ -79,12 +89,16 @@ threadMForm token = do
     time <- liftIO $ getCurrentTime
     (titleResult, titleView) <- mreq (lengthTextField MsgSubjectError) "" Nothing
     (contentResult, contentView) <- mreq nicHtmlField "" Nothing
-    let thread = Thread <$> titleResult <*> contentResult <*> (pure Nothing) <*> (pure time)
+    let thread = Thread <$> titleResult <*> contentResult <*> (pure Nothing) <*> (pure time) <*> (pure time)
         widget = [whamlet|
             #{token}
                 ^{fvInput titleView}
                 ^{fvInput contentView}
                 <input type=submit value="Create thread">
+            <br>
+            <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
+            <label> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
+            <label> <a href=lpaste.net> For larger files </a>
                  |] >> toWidget [lucius|
                        ##{fvId contentView} {
                            width:100%;

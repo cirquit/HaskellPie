@@ -21,8 +21,8 @@ postDeletePostR tid n = do
 
 
 removePost :: Thread -> Int -> Thread
-removePost thread@(Thread _ _ (Just l) _ _) n = thread {threadPosts = Just (deleteByIndex l n)}
-removePost thread@(Thread _ _ Nothing _ _) _ = thread
+removePost thread@(Thread _ _ (Just l) _ _ _) n = thread {threadPosts = Just (deleteByIndex l n)}
+removePost thread@(Thread _ _ Nothing _ _ _) _ = thread
 
 
 

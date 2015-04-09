@@ -2,7 +2,7 @@ module Handler.SignUp where
 
 import Import
 import Helper (dupe)
-import CustomForms (lengthTextField, initPasswordField)
+import CustomForms (initPasswordField)
 import Widgets (accountLinksW)
 --import Crypto.PasswordStore (makePassword)
 

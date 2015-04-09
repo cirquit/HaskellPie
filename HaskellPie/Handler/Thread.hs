@@ -12,8 +12,8 @@ getThreadR text = do
     let completeTitle = minusToSpaces text
     (Entity tid thread) <- runDB $ getBy404 $ UniqueTitle completeTitle
     let headline = threadTitle thread
-    let leftWidget = threadWidget tid thread
-    let rightWidget = postWidget enctype widget
+        leftWidget = threadWidget tid thread
+        rightWidget = postWidget enctype widget
     defaultLayout $(widgetFile "forum")
 
 postThreadR :: Text -> Handler Html
@@ -33,23 +33,24 @@ postThreadR text = do
     (nwidget, nenctype)         <- generateFormPost $ postMForm
     case result of
         (FormSuccess mpost)   -> do
+            let post = mpost user
             (Entity ntid newThread) <- runDB $ do
-                (_) <- update tid [ThreadPosts =. (addPost oldPosts (mpost user))]
+                (_) <- update tid [ThreadPosts =. (addPost oldPosts post), ThreadLastUpdate =. (postTime post)]
                 entity <-getBy404 $ UniqueTitle completeTitle
                 return entity
             let headline    = threadTitle thread
-            let leftWidget  = threadWidget ntid newThread
-            let rightWidget = postWidget nenctype nwidget
+                leftWidget  = threadWidget ntid newThread
+                rightWidget = postWidget nenctype nwidget
             defaultLayout $(widgetFile "forum")
         (FormFailure (err:_)) -> do
             let headline    = threadTitle thread
-            let leftWidget  = threadWidget tid thread
-            let rightWidget = [whamlet|<span .simpleBlack> #{err}|] >> postWidget enctype widget
+                leftWidget  = threadWidget tid thread
+                rightWidget = [whamlet|<span .simpleBlack> #{err}|] >> postWidget enctype widget
             defaultLayout $(widgetFile "forum")
         (_)                   -> do
             let headline    = threadTitle thread
-            let leftWidget  = threadWidget tid thread
-            let rightWidget = [whamlet|<span .simpleBlack> Something went wrong, please try again|] >> postWidget enctype widget
+                leftWidget  = threadWidget tid thread
+                rightWidget = [whamlet|<span .simpleBlack> Something went wrong, please try again|] >> postWidget enctype widget
             defaultLayout $(widgetFile "forum")
 
 postMForm :: Form (Maybe Person -> Post)
@@ -61,6 +62,11 @@ postMForm token = do
               #{token}
                    ^{fvInput contentView}
                   <input type=submit value="Submit post">
+                  <br>
+              <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
+              <br>
+              <label> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
+              <label> <a href=lpaste.net> For larger files </a>
                |] >> toWidget [lucius|
                        ##{fvId contentView} {
                            width:100%;

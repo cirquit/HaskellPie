@@ -1,7 +1,8 @@
 module Helper where
 
-import Import
+import Import hiding (last)
 import Prelude (read)
+import Data.List (last)
 
 data LoginData = LoginData {nick :: Text, pw :: Text}
 
@@ -43,3 +44,12 @@ formatDateStr dateString = formatTime defaultTimeLocale dateTimeFormat t
     where
         t :: UTCTime
         t = read dateString
+
+
+getLatestUpdate :: Thread -> UTCTime
+getLatestUpdate (Thread _ _ (Just posts) time _ _) = lasts posts postTime time
+getLatestUpdate (Thread _ _ _ time _ _)         = time
+
+lasts :: [a] -> (a -> b) -> b -> b
+lasts [] _ ifEmpty = ifEmpty
+lasts l f _ = f $ last l

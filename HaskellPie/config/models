@@ -24,6 +24,7 @@ Thread
     content Html
     posts [Post] Maybe
     time UTCTime default=CURRENT_TIME
+    lastUpdate UTCTime default=CURRENT_TIME
     creator Person Maybe
     deriving
 Post
