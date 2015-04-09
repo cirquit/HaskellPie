@@ -26,8 +26,11 @@ removePost thread@(Thread _ _ Nothing _ _ _) _ = thread
 
 
 
+-- deleteByIndex :: [a] -> Int -> [a]
+-- deleteByIndex []                   _ = []
+-- deleteByIndex l  (\x -> 0>x -> True) = l
+-- deleteByIndex (_:ls)               0 = ls
+-- deleteByIndex (l:ls)               n = l:deleteByIndex ls (n-1) 
+
 deleteByIndex :: [a] -> Int -> [a]
-deleteByIndex []                   _ = []
-deleteByIndex l  (\x -> 0>x -> True) = l
-deleteByIndex (_:ls)               0 = ls
-deleteByIndex (l:ls)               n = deleteByIndex ls (n-1) ++ [l]
+deleteByIndex xs i = take i xs ++ drop (i+1) xs
