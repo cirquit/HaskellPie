@@ -3,14 +3,14 @@ module Handler.EditPost where
 import Import
 import CustomForms (postMForm)
 import Widgets (threadWidget, postWidget, accountLinksW)
-import Helper (getPostByIndex, isPostAuthor)
+import Helper (getPostByIndex, getPostPermissions)
 
 getEditPostR :: ThreadId -> Int -> Handler Html
 getEditPostR tid n = do
     thread <- runDB $ get404 tid
     let mpost = getPostByIndex thread n
-    isAuthor <- isPostAuthor thread n
-    case (isAuthor, mpost) of
+    auth <- getPostPermissions thread n
+    case (auth, mpost) of
         (True, Just post) -> do
             (widget, enctype) <- generateFormPost $ postMForm "Update post" (Just $ postContent post)
             let headline = threadTitle thread
@@ -24,8 +24,8 @@ postEditPostR :: ThreadId -> Int -> Handler Html
 postEditPostR tid n = do
     thread <- runDB $ get404 tid
     let oldPost = getPostByIndex thread n
-    isAuthor <- isPostAuthor thread n
-    case (isAuthor, oldPost) of
+    auth <- getPostPermissions thread n
+    case (auth, oldPost) of
         (True, Just post)   -> do
             ((result, widget),enctype)<- runFormPost $ postMForm "Update post" (Just $ postContent post)
             case result of

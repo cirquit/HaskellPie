@@ -5,4 +5,4 @@ import Import
 getLogOutR :: Handler Html
 getLogOutR = do
     deleteSession "_ID"
-    redirectUltDest HomeR
+    redirect HomeR

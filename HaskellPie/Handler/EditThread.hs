@@ -1,15 +1,15 @@
 module Handler.EditThread where
 
 import Import
-import Helper (isThreadAuthor, spacesToMinus)
+import Helper (getThreadPermissions, spacesToMinus)
 import CustomForms (threadMForm)
 import Widgets (threadWidget, postWidget, accountLinksW)
 
 getEditThreadR :: ThreadId -> Handler Html
 getEditThreadR tid = do
     thread <- runDB $ get404 tid
-    isAuthor <- isThreadAuthor thread
-    case isAuthor of
+    auth <- getThreadPermissions thread
+    case auth of
         True -> do
             (widget, enctype) <- generateFormPost $ threadMForm "Update thread" (Just $ threadTitle thread) (Just $ threadContent thread)
             let headline = threadTitle thread
@@ -21,14 +21,14 @@ getEditThreadR tid = do
 postEditThreadR :: ThreadId -> Handler Html
 postEditThreadR tid = do
     thread <- runDB $ get404 tid
-    isAuthor <- isThreadAuthor thread
-    case isAuthor of
+    auth <- getThreadPermissions thread
+    case auth of
         True  -> do
             ((result, widget),enctype)<- runFormPost $ threadMForm "Update thread" (Just $ threadTitle thread) (Just $ threadContent thread)
             case result of
                 (FormSuccess mthread)   -> do
                     let newThread = mthread (threadCreator thread)
-                    runDB $ replace tid $ newThread {threadPosts = (threadPosts thread)}
+                    runDB $ replace tid $ newThread {threadPosts = (threadPosts thread), threadCreator = (threadCreator thread)}
                     redirect $ ThreadR (spacesToMinus $ threadTitle newThread)
                 (FormFailure (err:_)) -> do
                     let headline    = threadTitle thread

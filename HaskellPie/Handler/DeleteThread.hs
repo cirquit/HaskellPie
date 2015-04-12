@@ -1,20 +1,19 @@
 module Handler.DeleteThread where
 
 import Import
+import Helper (getThreadPermissions)
 
 getDeleteThreadR :: ThreadId -> Handler Html
 getDeleteThreadR tid = redirectToPost $ DeleteThreadR tid
 
 postDeleteThreadR :: ThreadId -> Handler Html
 postDeleteThreadR tid = do
-    mnick <- lookupSession "_ID"
     thread <- runDB $ get404 tid
-    case (mnick, threadCreator thread) of
-        (Just nick, Just person) -> case nick == personNick person of
-                                        True -> do
-                                            runDB $ delete tid
-                                            redirect ForumR
-                                        _    -> redirectUltDest HomeR
-        (_, _)                   -> redirectUltDest HomeR
+    auth <- getThreadPermissions thread
+    case auth of
+        True  -> do
+            runDB $ delete tid
+            redirect ForumR
+        (_)     -> redirectUltDest HomeR
 
 

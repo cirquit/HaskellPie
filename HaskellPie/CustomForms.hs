@@ -121,7 +121,7 @@ threadMForm text mTitle mHTML token = do
             <br>
             <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
             <label> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
-            <label> <a href=lpaste.net> For larger files </a>
+            <label> <a href=http://www.lpaste.net style="margin:2px;"> For larger files </a>
                  |] >> toWidget [lucius|
                        ##{fvId contentView} {
                            width:100%;

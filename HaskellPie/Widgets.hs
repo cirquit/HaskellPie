@@ -1,7 +1,8 @@
 module Widgets where
 
 import Import
-import Helper (formatDateStr, getLatestUpdate, spacesToMinus)
+import Helper (formatDateStr, getLatestUpdate, spacesToMinus,
+               cutBy20, isAdmin)
 
 postWidget :: Enctype -> Widget -> Widget
 postWidget enctype widget =  [whamlet|
@@ -33,16 +34,18 @@ threadWidget tid thread = do
    [whamlet|
         <div .thread_answer>
             $maybe (Person pnick _ _ _) <- threadCreator thread
-                 <span .simpleCreator> <a href=@{UserR pnick}> #{pnick} </a>
+                 <a .simpleCreator href=@{UserR pnick}> #{pnick}
             $nothing
                 <span .simpleCreator> Anonymous
             <span .simpleTime>#{formatDateStr $ show $ threadTime thread}
-            $maybe person <- threadCreator thread
-                $if nick == (personNick person)
+            $if (isAdmin mnick)
                     <a href=@{EditThreadR tid}> Edit thread
                     <a href=@{DeleteThreadR tid}> Delete thread
-                $else
-            $nothing
+            $else
+                $maybe person <- threadCreator thread
+                    $if nick == (personNick person)
+                        <a href=@{EditThreadR tid}> Edit thread
+                        <a href=@{DeleteThreadR tid}> Delete thread
             <br>
             <span> #{threadContent thread}
     $maybe posts <- threadPosts thread
@@ -50,28 +53,39 @@ threadWidget tid thread = do
             $forall (n, post) <- enum_posts
                 <div .thread_answer>
                         $maybe (Person pnick _ _ _)<- threadCreator thread
-                             <span .simpleCreator> <a href=@{UserR pnick}> #{pnick} </a>
+                            <a .simpleCreator href=@{UserR pnick}> #{pnick}
                         $nothing
                             <span .simpleCreator> Anonymous
                         <span .simpleTime> #{formatDateStr $ show $ postTime post}
-                        $maybe person <- postCreator post
-                            $if nick == (personNick person)
-                                <a href=@{EditPostR tid n}> Edit
-                                <a href=@{DeletePostR tid n}> Delete
+                        $if (isAdmin mnick)
+                            <a href=@{EditPostR tid n}> Edit
+                            <a href=@{DeletePostR tid n}> Delete
+                        $else
+                            $maybe person <- postCreator post
+                                $if nick == (personNick person)
+                                    <a href=@{EditPostR tid n}> Edit
+                                    <a href=@{DeletePostR tid n}> Delete
                         <br>
                         <span> #{postContent post}
                           |]
 
 threadListWidget :: [Entity Thread] -> Widget
 threadListWidget threads = [whamlet|
-        <ul>
-            $forall (Entity id thread) <- threads
-                <li>
-                    <a href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;">
-                        <label> #{threadTitle thread}
+    <table #threadList>
+        $forall (Entity id thread) <- threads
+            <tr>
+                $if (length (threadTitle thread)) > 20
+                    <td .tooltips>
+                        <a .threadLink href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> #{cutBy20 $ threadTitle thread}
+                        <span> #{threadTitle thread}
+                $else
+                    <td>
+                        <a .threadLink href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> #{cutBy20 $ threadTitle thread}
+                <td>
                     $maybe (Person nick _ _ _)<- threadCreator thread
-                         <span .simpleCreator> <a href=@{UserR nick}> #{nick} </a>
+                         <a .simpleCreator href=@{UserR nick}> #{nick}
                     $nothing
                         <span .simpleCreator> Anonymous
+                <td>
                     <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
 |]

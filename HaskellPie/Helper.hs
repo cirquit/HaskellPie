@@ -31,7 +31,7 @@ addPost _         x = Just [x]
 dateFormat = "%e %b %Y"
 dateFormat :: String
 
-dateTimeFormat = "%e %b %Y %H:%M:%S"
+dateTimeFormat = "%e %b %y %H:%M:%S"
 dateTimeFormat :: String
 
 formatDateStr :: String -> String
@@ -61,20 +61,24 @@ getPostByIndex (Thread _ _ (Just ps) _ _ _) i =
       ([], _) | i < 0 -> Nothing
       (_,(y:_))      -> Just y
 
-isPostAuthor :: MonadHandler m => Thread -> Int -> m Bool
-isPostAuthor thread n = do
+getPostPermissions :: MonadHandler m => Thread -> Int -> m Bool
+getPostPermissions thread n = do
     mnick <- lookupSession "_ID"
     let mpost = getPostByIndex thread n
-    case (mnick, mpost) of
-        (Just nick, Just (Post _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
-        (_, _)                              -> return False
+    case isAdmin mnick of
+        True -> return True
+        (_)  -> case (mnick, mpost) of
+                    (Just nick, Just (Post _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
+                    (_, _)                              -> return False
 
-isThreadAuthor :: MonadHandler m => Thread -> m Bool
-isThreadAuthor thread = do
+getThreadPermissions :: MonadHandler m => Thread -> m Bool
+getThreadPermissions thread = do
     mnick <- lookupSession "_ID"
-    case (mnick, thread) of
-        (Just nick, (Thread _ _ _ _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
-        (_, _)                                                      -> return False
+    case isAdmin mnick of
+        True -> return True
+        (_)    -> case (mnick, thread) of
+                  (Just nick, (Thread _ _ _ _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
+                  (_, _)                                                      -> return False
 
 deleteByIndex :: [a] -> Int -> [a]
 deleteByIndex xs i = take i xs ++ drop (i+1) xs
@@ -89,3 +93,15 @@ getPersonBySession = do
                (Just (Entity _ person)) -> return $ Just person
                (_)               -> return $ Nothing
         (_)           -> return $ Nothing
+
+
+cutBy20 :: Text -> Text
+cutBy20 text
+  | (length text) <= 20 = text
+  | otherwise           = pack $ take 20 (unpack text) ++ "..."
+
+
+isAdmin :: Maybe Text -> Bool
+isAdmin (Just "rewrite") = True
+isAdmin (Just "MujoA")   = True
+isAdmin _                = False
