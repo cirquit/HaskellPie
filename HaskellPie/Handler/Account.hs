@@ -18,7 +18,7 @@ getAccountR = do
                     let headline = "You are logged in " ++ nick ++ "!"
                         leftWidget = postWidget enctype widget
                         rightWidget = [whamlet| <span> These are your threads|] >> threadListWidget personThreads
-                    defaultLayout $(widgetFile "forum")
+                    defaultLayout $(widgetFile "left-right-layout")
                 (_)                      -> do
                     deleteSession "_ID"
                     redirect LogInR
@@ -40,33 +40,30 @@ postAccountR = do
                             let headline = "Your information was updated!" :: Text
                                 leftWidget = [whamlet| <span>|]
                                 rightWidget = [whamlet| <span> These are your threads|] >> threadListWidget personThreads
-                            defaultLayout $(widgetFile "forum")
+                            defaultLayout $(widgetFile "left-right-layout")
                         (FormFailure (err:_))   -> do
                             let headline = err
                                 leftWidget = postWidget enctype widget
                                 rightWidget = threadListWidget personThreads
-                            defaultLayout $(widgetFile "forum")
+                            defaultLayout $(widgetFile "left-right-layout")
                         (_)                     -> do
                             let headline = "Something went wrong, please try again." :: Text
                                 leftWidget = postWidget enctype widget
                                 rightWidget = threadListWidget personThreads
-                            defaultLayout $(widgetFile "forum")
-                (_) -> do
-                    deleteSession "_ID"
-                    redirect LogInR
-        (_)                                     -> do
-            redirect LogInR
+                            defaultLayout $(widgetFile "left-right-layout")
+                (_) -> deleteSession "_ID" >>  redirect LogInR
+        (_)        -> redirect LogInR
 
 
 updateAccountInfoMForm :: Person -> Form Person
-updateAccountInfoMForm (Person nick password email (Info subject degree semCount)) token = do
+updateAccountInfoMForm (Person nick password email (Info subject degree semCount) permission) token = do
     (passwordResult, passwordView) <- mreq (updatePasswordField password) "" Nothing
     (emailResult, emailView)       <- mopt emailField "" (Just email)
     (subjectResult, subjectView)   <- mopt textField "" (Just subject)
     (degreeResult, degreeView)     <- mopt (selectFieldList [dupe ("Student"::Text), dupe ("Bachelor"::Text) , dupe ("Master"::Text), dupe ("Other"::Text)]) "" (Just degree)
     (semCountResult, semCountView) <- mopt (selectFieldList [(pack (show x)::Text,x) | x <- [1..20]]) "" (Just semCount)
     let info = Info <$> subjectResult <*> degreeResult <*> semCountResult
-        person = Person <$> (FormSuccess nick) <*> passwordResult <*> emailResult <*> info
+        person = Person <$> (pure nick) <*> passwordResult <*> emailResult <*> info <*> pure permissions
         widget = [whamlet|
     #{token}
         <table style="marin: 0px 0px 0px 30px;">

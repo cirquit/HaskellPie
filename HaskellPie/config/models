@@ -13,6 +13,7 @@ Person
     password Text
     email Text Maybe
     info Info
+    permission Int
     UniqueNick nick
     deriving Show
 Info
@@ -22,12 +23,12 @@ Info
     deriving Show
 Thread
     title Text
-    UniqueTitle title
     content Html
     posts [Post] Maybe
     time UTCTime default=CURRENT_TIME
     lastUpdate UTCTime default=CURRENT_TIME
     creator Person Maybe
+    UniqueTitle title
     deriving
 Post
     content Html

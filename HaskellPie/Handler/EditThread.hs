@@ -15,7 +15,7 @@ getEditThreadR tid = do
             let headline = threadTitle thread
                 leftWidget = threadWidget tid thread
                 rightWidget = postWidget enctype widget
-            defaultLayout $(widgetFile "forum")
+            defaultLayout $(widgetFile "left-right-layout")
         (_)  -> redirectUltDest HomeR
 
 postEditThreadR :: ThreadId -> Handler Html
@@ -34,10 +34,10 @@ postEditThreadR tid = do
                     let headline    = threadTitle thread
                         leftWidget  = threadWidget tid thread
                         rightWidget = [whamlet|<span .simpleBlack> #{err}|] >> postWidget enctype widget
-                    defaultLayout $(widgetFile "forum")
+                    defaultLayout $(widgetFile "left-right-layout")
                 (_)                   -> do
                     let headline    = threadTitle thread
                         leftWidget  = threadWidget tid thread
                         rightWidget = [whamlet|<span .simpleBlack> Something went wrong, please try again|] >> postWidget enctype widget
-                    defaultLayout $(widgetFile "forum")
+                    defaultLayout $(widgetFile "left-right-layout")
         (_)   -> redirectUltDest HomeR

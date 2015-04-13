@@ -5,7 +5,7 @@ import Import
 
 getErrorR :: Handler Html
 getErrorR = do
-    let content = [whamlet|
-        <span .simpleBlack> Sorry, you can't do that
-                  |]
-    defaultLayout $(widgetFile "homepage")
+    let headline = "Sorry, this URL does not exist" :: Text
+        leftWidget  = [whamlet| <span> |]
+        rightWidget = [whamlet| <span> |]
+    defaultLayout $(widgetFile "left-right-layout")

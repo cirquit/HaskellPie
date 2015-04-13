@@ -14,7 +14,7 @@ passwordsEntityMatch pw (Just (Entity _ person)) = (personPassword person) == pw
 passwordsEntityMatch _  _                        = False
 
 passwordsFormMatch ::  Person -> FormResult Text -> Bool
-passwordsFormMatch (Person _ curPw _ _) (FormSuccess newPw) = newPw == curPw
+passwordsFormMatch (Person _ curPw _ _ _) (FormSuccess newPw) = newPw == curPw
 passwordsFormMatch _  _                                     = False
 
 spacesToMinus :: Text -> Text
@@ -50,7 +50,7 @@ lasts [] _ ifEmpty = ifEmpty
 lasts l  f _       = f $ last l
 
 nickPersonMatch :: (Maybe Text, Maybe Person) -> Bool
-nickPersonMatch ((Just nick),(Just (Person pnick _ _ _))) = nick == pnick
+nickPersonMatch ((Just nick),(Just (Person pnick _ _ _ _))) = nick == pnick
 nickPersonMatch _                                         = False
 
 getPostByIndex :: Thread -> Int -> Maybe Post
@@ -68,7 +68,7 @@ getPostPermissions thread n = do
     case isAdmin mnick of
         True -> return True
         (_)  -> case (mnick, mpost) of
-                    (Just nick, Just (Post _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
+                    (Just nick, Just (Post _ _ (Just (Person pnick _ _ _ _)))) -> return $ nick == pnick
                     (_, _)                              -> return False
 
 getThreadPermissions :: MonadHandler m => Thread -> m Bool
@@ -103,5 +103,10 @@ cutBy20 text
 
 isAdmin :: Maybe Text -> Bool
 isAdmin (Just "rewrite") = True
-isAdmin (Just "MujoA")   = True
+isAdmin (Just "Allora")  = True
 isAdmin _                = False
+
+isAdminLoggedIn :: (MonadHandler m) => m Bool
+isAdminLoggedIn = do
+    mnick <- lookupSession "_ID"
+    return $ isAdmin mnick

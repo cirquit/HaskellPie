@@ -36,6 +36,7 @@ library
                      Handler.EditPost
                      Handler.EditThread
                      Handler.User
+                     Handler.NoPermissions
                      Widgets
                      CustomForms
                      Helper

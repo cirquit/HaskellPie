@@ -3,7 +3,7 @@ module Handler.SignUp where
 import Import
 import Helper (dupe)
 import CustomForms (initPasswordField)
-import Widgets (accountLinksW)
+import Widgets (accountLinksW, postWidget)
 --import Crypto.PasswordStore (makePassword)
 
 getSignUpR :: Handler Html
@@ -14,12 +14,10 @@ getSignUpR = do
             redirect AccountR
         (_)         -> do
             (widget, enctype) <- generateFormPost signupMForm
-            let content = [whamlet|
-                    <span .simpleBlack> You can create an account here!
-                    <form method=post enctype=#{enctype}>
-                        ^{widget}
-                          |]
-            defaultLayout $(widgetFile "homepage")
+            let headline = "You can create an account here" :: Text
+                leftWidget = postWidget enctype widget
+                rightWidget = [whamlet| <span> |]
+            defaultLayout $(widgetFile "left-right-layout")
 
 postSignUpR :: Handler Html
 postSignUpR = do
@@ -29,31 +27,24 @@ postSignUpR = do
             mnick <- runDB $ getBy $ UniqueNick nick
             case mnick of
                 (Just _) -> do
-                    let content = [whamlet|
-                            <span .simpleBlack> This username is already taken, sorry.
-                            <form method=post enctype=#{enctype}>
-                                ^{widget}
-                                  |]
-                    defaultLayout $(widgetFile "homepage")
+                    let headline = "You can create an account here" :: Text
+                        leftWidget = [whamlet| <span .simpleBlack> This username is already taken, sorry.|] >> postWidget enctype widget
+                        rightWidget = [whamlet| <span> |]
+                    defaultLayout $(widgetFile "left-right-layout")
                 (_)      -> do
                     (_) <- runDB $ insert (Person nick pw email (Info subject degree semCountResult))
                     setSession "_ID" nick
                     redirectUltDest HomeR
         (FormFailure (err:_)) -> do
-            let content = [whamlet|
-                    <span .simpleBlack> #{err}
-                    <form method=post enctype=#{enctype}>
-                        ^{widget}
-                          |]
-            defaultLayout $(widgetFile "homepage")
+            let headline = "You can create an account here" :: Text
+                leftWidget = [whamlet| <span .simpleBlack> #{err}|] >> postWidget enctype widget
+                rightWidget = [whamlet| <span> |]
+            defaultLayout $(widgetFile "left-right-layout")
         (_) -> do
-            let content = [whamlet|
-                <div style="margin:30px 0px 0px 15px;">
-                    <span .simpleBlack> Some error happend, please try again!
-                    <form method=post enctype=#{enctype}>
-                        ^{widget}
-                          |]
-            defaultLayout $(widgetFile "homepage")
+            let headline = "You can create an account here" :: Text
+                leftWidget = [whamlet| <span .simpleBlack> Some error happend, please try again |] >> postWidget enctype widget
+                rightWidget = [whamlet| <span> |]
+            defaultLayout $(widgetFile "left-right-layout")
 
 
 
@@ -66,7 +57,7 @@ signupMForm token = do
     (degreeResult, degreeView)     <- mopt (selectFieldList [dupe ("Student"::Text), dupe ("Bachelor"::Text) , dupe ("Master"::Text), dupe ("Other"::Text)]) "" Nothing
     (semCountResult, semCountView) <- mopt (selectFieldList [(pack (show x)::Text,x) | x <- [1..20]]) "" Nothing
     let degree = Info <$> subjectResult <*> degreeResult <*> semCountResult
-        person = Person <$> nickResult <*> passwordResult <*> emailResult <*> degree
+        person = Person <$> nickResult <*> passwordResult <*> emailResult <*> degree <*> pure 3
         widget = [whamlet|
     #{token}
     <div style="margin:15px 0px 0px 15px;">

@@ -117,8 +117,8 @@ instance Yesod App where
 
     -- custom 404
     errorHandler NotFound = redirect ErrorR
-    errorHandler _ = redirect ErrorR
-    --errorHandler other = defaultErrorHandler other
+   -- errorHandler _ = redirect ErrorR
+    errorHandler other = defaultErrorHandler other
 
 -- How to run database actions.
 instance YesodPersist App where

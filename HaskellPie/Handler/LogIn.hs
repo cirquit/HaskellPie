@@ -1,7 +1,7 @@
 module Handler.LogIn where
 
 import Import
-import Widgets (accountLinksW)
+import Widgets (accountLinksW, postWidget)
 import Helper
 
 getLogInR :: Handler Html
@@ -11,11 +11,10 @@ getLogInR = do
       (Just _) -> redirect AccountR
       (_)      -> do
           (widget, enctype) <- generateFormPost signupMForm
-          let content = [whamlet|
-                  <form method=post enctype=#{enctype}>
-                      ^{widget}
-                        |]
-          defaultLayout $(widgetFile "homepage")
+          let headline = "Please log in" :: Text
+          let leftWidget = postWidget enctype widget
+          let rightWidget = [whamlet|<span>|]
+          defaultLayout $(widgetFile "left-right-layout")
 
 postLogInR :: Handler Html
 postLogInR = do
@@ -28,19 +27,15 @@ postLogInR = do
                     setSession "_ID" nick
                     redirectUltDest HomeR
                 (_)                         -> do
-                    let content = [whamlet|
-                            <span class=simpleBlack> Something doesn't match up, please try again.
-                            <form method=post enctype=#{enctype}>
-                                ^{widget}
-                                  |]
-                    defaultLayout $(widgetFile "homepage")
+                    let headline = "Please log in" :: Text
+                    let leftWidget = [whamlet|<span .simpleBlack> Something doesn't match up, please try again. |] >> postWidget enctype widget
+                    let rightWidget = [whamlet|<span>|]
+                    defaultLayout $(widgetFile "left-right-layout")
         (_)                                 -> do
-            let content = [whamlet|
-                    <span class=simpleBlack> Something doesn't match up, please try again.
-                    <form method=post enctype=#{enctype}>
-                        ^{widget}
-                          |]
-            defaultLayout $(widgetFile "homepage")
+            let headline = "Please log in" :: Text
+            let leftWidget = [whamlet| <span .simpleBlack> Something doesn't match up, please try again.|] >> postWidget enctype widget
+            let rightWidget = [whamlet|<span>|]
+            defaultLayout $(widgetFile "left-right-layout")
 
 signupMForm :: Form LoginData
 signupMForm token = do

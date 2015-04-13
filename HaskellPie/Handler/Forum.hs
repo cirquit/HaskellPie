@@ -13,7 +13,7 @@ getForumR = do
     let headline = "Forum" :: Text
     let leftWidget = threadListWidget allThreads
     let rightWidget = postWidget enctype widget
-    defaultLayout $(widgetFile "forum")
+    defaultLayout $(widgetFile "left-right-layout")
 
 postForumR :: Handler Html
 postForumR = do
@@ -34,16 +34,16 @@ postForumR = do
                     let headline = "Forum" :: Text
                     let leftWidget = threadListWidget allThreads
                     let rightWidget = [whamlet|<span .simpleBlack> Error: Sorry, this thread already exists |] >> postWidget enctype widget
-                    defaultLayout $(widgetFile "forum")
+                    defaultLayout $(widgetFile "left-right-layout")
         (FormFailure (err:_))           -> do
             allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
             let headline = "Forum" :: Text
             let leftWidget = threadListWidget allThreads
             let rightWidget = [whamlet|<span .simpleBlack> Error: #{err} |] >> postWidget enctype widget
-            defaultLayout $(widgetFile "forum")
+            defaultLayout $(widgetFile "left-right-layout")
         (_)                             -> do
             allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
             let headline = "Forum" :: Text
             let leftWidget = threadListWidget allThreads
             let rightWidget = [whamlet|<span .simpleBlack> Error: Something went wrong, please try again |] >> postWidget enctype widget
-            defaultLayout $(widgetFile "forum")
+            defaultLayout $(widgetFile "left-right-layout")
