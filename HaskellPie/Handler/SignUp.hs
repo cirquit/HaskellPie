@@ -23,7 +23,7 @@ postSignUpR :: Handler Html
 postSignUpR = do
     ((res, widget), enctype) <- runFormPost signupMForm
     case res of
-        (FormSuccess (Person nick pw email (Info subject degree semCountResult))) -> do
+        (FormSuccess (Person nick pw email (Info subject degree semCountResult) perms)) -> do
             mnick <- runDB $ getBy $ UniqueNick nick
             case mnick of
                 (Just _) -> do
@@ -32,7 +32,7 @@ postSignUpR = do
                         rightWidget = [whamlet| <span> |]
                     defaultLayout $(widgetFile "left-right-layout")
                 (_)      -> do
-                    (_) <- runDB $ insert (Person nick pw email (Info subject degree semCountResult))
+                    (_) <- runDB $ insert (Person nick pw email (Info subject degree semCountResult) perms)
                     setSession "_ID" nick
                     redirectUltDest HomeR
         (FormFailure (err:_)) -> do

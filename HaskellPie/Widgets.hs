@@ -33,7 +33,7 @@ threadWidget tid thread = do
    let enum = [0..]::[Int]
    [whamlet|
         <div .thread_answer>
-            $maybe (Person pnick _ _ _) <- threadCreator thread
+            $maybe (Person pnick _ _ _ _) <- threadCreator thread
                  <a .simpleCreator href=@{UserR pnick}> #{pnick}
             $nothing
                 <span .simpleCreator> Anonymous
@@ -52,7 +52,7 @@ threadWidget tid thread = do
         $with enum_posts <- (zip enum posts)
             $forall (n, post) <- enum_posts
                 <div .thread_answer>
-                        $maybe (Person pnick _ _ _)<- threadCreator thread
+                        $maybe (Person pnick _ _ _ _) <- postCreator post
                             <a .simpleCreator href=@{UserR pnick}> #{pnick}
                         $nothing
                             <span .simpleCreator> Anonymous
@@ -82,7 +82,7 @@ threadListWidget threads = [whamlet|
                     <td>
                         <a .threadLink href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> #{cutBy20 $ threadTitle thread}
                 <td>
-                    $maybe (Person nick _ _ _)<- threadCreator thread
+                    $maybe (Person nick _ _ _ _)<- threadCreator thread
                          <a .simpleCreator href=@{UserR nick}> #{nick}
                     $nothing
                         <span .simpleCreator> Anonymous

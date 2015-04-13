@@ -77,8 +77,8 @@ getThreadPermissions thread = do
     case isAdmin mnick of
         True -> return True
         (_)    -> case (mnick, thread) of
-                  (Just nick, (Thread _ _ _ _ _ (Just (Person pnick _ _ _)))) -> return $ nick == pnick
-                  (_, _)                                                      -> return False
+                  (Just nick, (Thread _ _ _ _ _ (Just (Person pnick _ _ _ _)))) -> return $ nick == pnick
+                  (_, _)                                                        -> return False
 
 deleteByIndex :: [a] -> Int -> [a]
 deleteByIndex xs i = take i xs ++ drop (i+1) xs

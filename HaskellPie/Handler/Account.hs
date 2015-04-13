@@ -56,7 +56,7 @@ postAccountR = do
 
 
 updateAccountInfoMForm :: Person -> Form Person
-updateAccountInfoMForm (Person nick password email (Info subject degree semCount) permission) token = do
+updateAccountInfoMForm (Person nick password email (Info subject degree semCount) permissions) token = do
     (passwordResult, passwordView) <- mreq (updatePasswordField password) "" Nothing
     (emailResult, emailView)       <- mopt emailField "" (Just email)
     (subjectResult, subjectView)   <- mopt textField "" (Just subject)
