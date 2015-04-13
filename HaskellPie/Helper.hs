@@ -15,24 +15,24 @@ passwordsEntityMatch _  _                        = False
 
 passwordsFormMatch ::  Person -> FormResult Text -> Bool
 passwordsFormMatch (Person _ curPw _ _ _) (FormSuccess newPw) = newPw == curPw
-passwordsFormMatch _  _                                     = False
+passwordsFormMatch _  _                                       = False
 
 spacesToMinus :: Text -> Text
-spacesToMinus ys = pack $ foldr (\x xs -> if x == ' ' then '-':xs else x:xs) [] (unpack ys)
+spacesToMinus ys = Data.Text.map (\x xs -> if x == ' ' then '-' else x) ys
 
 minusToSpaces :: Text -> Text
-minusToSpaces ys = pack $ foldr (\x xs -> if x == '-' then ' ':xs else x:xs) [] (unpack ys)
+minusToSpaces ys = Data.Text.map (\x xs -> if x == '-' then ' ' else x) ys
 
 addPost :: Maybe [Post] -> Post -> Maybe [Post]
 addPost (Just xs) x = Just (xs ++ [x])
 addPost _         x = Just [x]
 
 
-dateFormat = "%e %b %Y"
 dateFormat :: String
+dateFormat = "%e %b %Y"
 
-dateTimeFormat = "%e %b %y %H:%M:%S"
 dateTimeFormat :: String
+dateTimeFormat = "%e %b %y %H:%M:%S"
 
 formatDateStr :: String -> String
 formatDateStr dateString = formatTime defaultTimeLocale dateTimeFormat t
@@ -43,7 +43,7 @@ formatDateStr dateString = formatTime defaultTimeLocale dateTimeFormat t
 
 getLatestUpdate :: Thread -> UTCTime
 getLatestUpdate (Thread _ _ (Just posts) time _ _) = lasts posts postTime time
-getLatestUpdate (Thread _ _ _ time _ _)         = time
+getLatestUpdate (Thread _ _ _ time _ _)            = time
 
 lasts :: [a] -> (a -> b) -> b -> b
 lasts [] _ ifEmpty = ifEmpty
@@ -51,15 +51,23 @@ lasts l  f _       = f $ last l
 
 nickPersonMatch :: (Maybe Text, Maybe Person) -> Bool
 nickPersonMatch ((Just nick),(Just (Person pnick _ _ _ _))) = nick == pnick
-nickPersonMatch _                                         = False
+nickPersonMatch _                                           = False
+
+-- getPostByIndex :: Thread -> Int -> Maybe Post
+-- getPostByIndex (Thread _ _ Nothing _ _ _)   _ = Nothing
+-- getPostByIndex (Thread _ _ (Just ps) _ _ _) i =
+--     case splitAt i ps of
+--       (_, [])         -> Nothing
+--       ([], _) | i < 0 -> Nothing
+--       (_,(y:_))       -> Just y
+
 
 getPostByIndex :: Thread -> Int -> Maybe Post
-getPostByIndex (Thread _ _ Nothing _ _ _)   _ = Nothing
-getPostByIndex (Thread _ _ (Just ps) _ _ _) i =
-    case splitAt i ps of
-      (_, [])         -> Nothing
-      ([], _) | i < 0 -> Nothing
-      (_,(y:_))      -> Just y
+getPostByIndex (Thread _ _ Nothing   _ _ _) _ = Nothing
+getPostByIndex (Thread _ _ (Just ps) _ _ _) i = lookup i indexedPosts
+    where indexedPosts = zip [1..] ps
+
+
 
 getPostPermissions :: MonadHandler m => Thread -> Int -> m Bool
 getPostPermissions thread n = do
