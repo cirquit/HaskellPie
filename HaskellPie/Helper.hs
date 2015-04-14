@@ -1,8 +1,9 @@
 module Helper where
 
-import Import hiding (last)
 import Prelude (read)
+import Import hiding (last)
 import Data.List (last)
+import qualified Data.Text as T
 
 data LoginData = LoginData {nick :: Text, pw :: Text}
 
@@ -18,10 +19,10 @@ passwordsFormMatch (Person _ curPw _ _ _) (FormSuccess newPw) = newPw == curPw
 passwordsFormMatch _  _                                       = False
 
 spacesToMinus :: Text -> Text
-spacesToMinus ys = Data.Text.map (\x xs -> if x == ' ' then '-' else x) ys
+spacesToMinus ys = T.map (\x -> if x == ' ' then '-' else x) ys
 
 minusToSpaces :: Text -> Text
-minusToSpaces ys = Data.Text.map (\x xs -> if x == '-' then ' ' else x) ys
+minusToSpaces ys = T.map (\x -> if x == '-' then ' ' else x) ys
 
 addPost :: Maybe [Post] -> Post -> Maybe [Post]
 addPost (Just xs) x = Just (xs ++ [x])
@@ -76,8 +77,8 @@ getPostPermissions thread n = do
     case isAdmin mnick of
         True -> return True
         (_)  -> case (mnick, mpost) of
-                    (Just nick, Just (Post _ _ (Just (Person pnick _ _ _ _)))) -> return $ nick == pnick
-                    (_, _)                              -> return False
+                    (Just nick, Just (Post _ _ (Just pnick))) -> return $ nick == pnick
+                    (_, _)                                    -> return False
 
 getThreadPermissions :: MonadHandler m => Thread -> m Bool
 getThreadPermissions thread = do
@@ -85,36 +86,46 @@ getThreadPermissions thread = do
     case isAdmin mnick of
         True -> return True
         (_)    -> case (mnick, thread) of
-                  (Just nick, (Thread _ _ _ _ _ (Just (Person pnick _ _ _ _)))) -> return $ nick == pnick
-                  (_, _)                                                        -> return False
+                  (Just nick, (Thread _ _ _ _ _ (Just pnick))) -> return $ (nick == pnick)
+                  (_, _)                                       -> return False
 
 deleteByIndex :: [a] -> Int -> [a]
 deleteByIndex xs i = take i xs ++ drop (i+1) xs
 
-getPersonBySession:: MonadHandler m => ReaderT SqlBackend m (Maybe Person)
+getPersonBySession:: MonadHandler m => ReaderT SqlBackend m (Maybe Text)
 getPersonBySession = do
     mnick <- lookupSession "_ID"
     case mnick of
         (Just nick) -> do
             mperson <- getBy $ UniqueNick nick
             case mperson of
-               (Just (Entity _ person)) -> return $ Just person
+               (Just (Entity _ person)) -> return $ Just $ personNick person
                (_)               -> return $ Nothing
         (_)           -> return $ Nothing
 
+isAdminLoggedIn :: (MonadHandler m) => m Bool
+isAdminLoggedIn = do
+    mnick <- lookupSession "_ID"
+    return $ isAdmin mnick
 
-cutBy20 :: Text -> Text
-cutBy20 text
-  | (length text) <= 20 = text
-  | otherwise           = pack $ take 20 (unpack text) ++ "..."
+--isModeratorBySession = do
 
+hasModRights :: Int -> Bool
+hasModRights i = i < 3
 
 isAdmin :: Maybe Text -> Bool
 isAdmin (Just "rewrite") = True
 isAdmin (Just "Allora")  = True
 isAdmin _                = False
 
-isAdminLoggedIn :: (MonadHandler m) => m Bool
-isAdminLoggedIn = do
+isModeratorBySession :: MonadHandler m => ReaderT SqlBackend m Bool
+isModeratorBySession = do
     mnick <- lookupSession "_ID"
-    return $ isAdmin mnick
+    case (isAdmin mnick, mnick) of
+        (True, _)         -> return True
+        (_, (Just nick)) -> do
+            mperson <- getBy $ UniqueNick nick
+            case mperson of
+                (Just (Entity _ (Person _ _ _ _ permissions))) -> return $ permissions < 3
+                (_)                                            -> return False
+        (_,_)            -> return False

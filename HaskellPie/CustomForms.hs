@@ -83,7 +83,7 @@ updatePasswordField oldpw = Field
     }
 
 
-postMForm :: Text -> Maybe Html -> Form (Maybe Person -> Post)
+postMForm :: Text -> Maybe Html -> Form (Maybe Text -> Post)
 postMForm text mHTML token  = do
   time <- liftIO $ getCurrentTime
   (contentResult, contentView) <- mreq nicHtmlField "" mHTML
@@ -107,7 +107,7 @@ postMForm text mHTML token  = do
   return (post, widget)
 
 
-threadMForm :: Text -> Maybe Text -> Maybe Html -> Form (Maybe Person -> Thread)
+threadMForm :: Text -> Maybe Text -> Maybe Html -> Form (Maybe Text -> Thread)
 threadMForm text mTitle mHTML token = do
     time <- liftIO $ getCurrentTime
     (titleResult, titleView) <- mreq (lengthTextField MsgSubjectError) "" mTitle

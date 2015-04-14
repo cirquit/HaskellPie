@@ -7,7 +7,7 @@
 / HomeR GET
 /blog/ BlogR GET
 /tutorials/ TutorialsR GET
-/forum/ ForumR GET POST
+/forum/ ForumR GET
 /contact/ ContactR GET
 /signup/ SignUpR GET POST
 /login/ LogInR GET POST
@@ -22,3 +22,4 @@
 /editthread/#ThreadId EditThreadR GET POST
 /user/#Text UserR GET POST
 /nopermissions/ NoPermissionsR GET
+/createthread/ CreateThreadR GET POST

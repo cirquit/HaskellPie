@@ -12,4 +12,4 @@
     <div id="main_content">
             <div id="err_margin">
             <div id="title"> <p class=simpleTitle> #{headline} </p>
-            <div id="mid">
+            <div id="mid"> ^{midWidget}

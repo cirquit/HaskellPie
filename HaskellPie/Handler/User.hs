@@ -7,7 +7,7 @@ import Widgets (threadListWidget, accountLinksW, postWidget)
 getUserR :: Text -> Handler Html
 getUserR nick = do
     (Entity _ person) <- runDB $ getBy404 $ UniqueNick nick
-    personThreads <- runDB $ selectList [ThreadCreator ==. (Just person)] [Desc ThreadLastUpdate]
+    personThreads <- runDB $ selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
     (widget, enctype) <- generateFormPost $ updatePermissionsMForm person
     auth <- isAdminLoggedIn
     let infoList = accountWidget person
@@ -22,16 +22,16 @@ getUserR nick = do
 postUserR :: Text -> Handler Html
 postUserR nick = do
     (Entity pid person) <- runDB $ getBy404 $ UniqueNick nick
-    personThreads <- runDB $ selectList [ThreadCreator ==. (Just person)] [Desc ThreadLastUpdate]
+    personThreads <- runDB $ selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
     auth <- isAdminLoggedIn
     case auth of
         True -> do
             ((res, widget),enctype) <- runFormPost $ updatePermissionsMForm person
             case res of
-                (FormSuccess newPerson)  -> do
-                    (_) <- runDB $ replace pid $ newPerson
+                (FormSuccess p@(Person _ _ _ _ permissions))  -> do
+                    (_) <- runDB $ update pid [PersonPermission =. permissions]
                     let headline = nick ++ pack "'s Profile"
-                        leftWidget = accountWidget newPerson >> postWidget enctype widget
+                        leftWidget = accountWidget person >> postWidget enctype widget
                         rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads
                     defaultLayout $(widgetFile "left-right-layout")
                 (FormFailure (err:_)) -> do

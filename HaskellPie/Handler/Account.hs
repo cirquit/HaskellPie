@@ -13,7 +13,7 @@ getAccountR = do
             mperson <- runDB $ getBy $ UniqueNick nick
             case mperson of
                 (Just (Entity _ person)) -> do
-                    personThreads <- runDB $ selectList [ThreadCreator ==. (Just person)] [Desc ThreadLastUpdate]
+                    personThreads <- runDB $ selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
                     (widget, enctype) <- generateFormPost $ updateAccountInfoMForm person
                     let headline = "You are logged in " ++ nick ++ "!"
                         leftWidget = postWidget enctype widget
@@ -32,13 +32,13 @@ postAccountR = do
             mperson <- runDB $ getBy $ UniqueNick nick
             case mperson of
                 (Just (Entity pid person)) -> do
-                    personThreads <- runDB $ selectList [ThreadCreator ==. (Just person)] [Desc ThreadLastUpdate]
+                    personThreads <- runDB $ selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
                     ((res, widget), enctype) <- runFormPost $ updateAccountInfoMForm person
                     case res of
-                        (FormSuccess newPerson) -> do
-                            (_) <- runDB $ replace pid $ newPerson
+                        (FormSuccess (Person _ pw email info permissions)) -> do
+                            (_) <- runDB $ update pid $ [PersonPassword =. pw, PersonEmail =. email, PersonInfo =. info, PersonPermission =. permissions]
                             let headline = "Your information was updated!" :: Text
-                                leftWidget = [whamlet| <span>|]
+                                leftWidget = postWidget enctype widget
                                 rightWidget = [whamlet| <span> These are your threads|] >> threadListWidget personThreads
                             defaultLayout $(widgetFile "left-right-layout")
                         (FormFailure (err:_))   -> do
