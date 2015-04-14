@@ -36,9 +36,9 @@ threadWidget isMod tid thread = do
    [whamlet|
         <div .thread_answer>
             $maybe pnick <- threadCreator thread
-                 <a .simpleCreator href=@{UserR pnick}> #{pnick}
+                 <a .username href=@{UserR pnick}> #{pnick}
             $nothing
-                <span .simpleCreator> Anonymous
+                <span .username> Anonymous
             <span .simpleTime>#{formatDateStr $ show $ threadTime thread}
             $if isMod
                     <a href=@{EditThreadR tid}> Edit thread
@@ -72,14 +72,14 @@ threadWidget isMod tid thread = do
                           |]
 
 
-threadListWidget :: [Entity Thread] -> Widget
-threadListWidget threads = [whamlet|
+threadListWidget :: [Entity Thread] -> Int -> Widget
+threadListWidget threads maxlength = [whamlet|
     <table .threads>
         $forall (Entity id thread) <- threads
             <tr .post>
                 <td .threadname>
-                    $if (length (threadTitle thread)) > 50
-                        <a .threadname href=@{ThreadR $ spacesToMinus $ threadTitle thread}> #{take 50 $ threadTitle thread}...
+                    $if (length (threadTitle thread)) > maxlength
+                        <a .threadname href=@{ThreadR $ spacesToMinus $ threadTitle thread}> #{take maxlength $ threadTitle thread}...
                     $else
                         <a .threadname href=@{ThreadR $ spacesToMinus $ threadTitle thread}> #{threadTitle thread}
                 <td .threadby>

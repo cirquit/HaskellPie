@@ -15,7 +15,7 @@ getUserR nick = do
                          True -> infoList >> postWidget enctype widget
                          (_)  -> infoList
         headline = nick ++ pack "'s Profile"
-        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads
+        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads 15
     defaultLayout $(widgetFile "left-right-layout")
 
 
@@ -28,21 +28,21 @@ postUserR nick = do
         True -> do
             ((res, widget),enctype) <- runFormPost $ updatePermissionsMForm person
             case res of
-                (FormSuccess p@(Person _ _ _ _ permissions))  -> do
+                (FormSuccess (Person _ _ _ _ permissions))  -> do
                     (_) <- runDB $ update pid [PersonPermission =. permissions]
                     let headline = nick ++ pack "'s Profile"
                         leftWidget = accountWidget person >> postWidget enctype widget
-                        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads
+                        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads 15
                     defaultLayout $(widgetFile "left-right-layout")
                 (FormFailure (err:_)) -> do
                     let headline = err
                         leftWidget = accountWidget person >> postWidget enctype widget
-                        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads
+                        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads 15
                     defaultLayout $(widgetFile "left-right-layout")
                 (_)                   -> do
                     let headline = "Something went wrong, please try again" :: Text
                         leftWidget = accountWidget person >> postWidget enctype widget
-                        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads
+                        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads 15
                     defaultLayout $(widgetFile "left-right-layout")
         (_)  -> redirect NoPermissionsR
 

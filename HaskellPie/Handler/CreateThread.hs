@@ -2,7 +2,7 @@ module Handler.CreateThread where
 
 
 import Import
-import Widgets (accountLinksW, postWidget, threadListWidget)
+import Widgets (accountLinksW, postWidget)
 import CustomForms (threadMForm)
 import Helper (spacesToMinus, getPersonBySession)
 

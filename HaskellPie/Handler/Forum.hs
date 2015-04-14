@@ -10,7 +10,7 @@ getForumR :: Handler Html
 getForumR = do
     allThreads <- runDB $ selectList [] [Desc ThreadLastUpdate]
     let headline = "Forum" :: Text
-    let midWidget = threadListWidget allThreads >> [whamlet|
+    let midWidget = threadListWidget allThreads 50 >> [whamlet|
         <form action=@{CreateThreadR}>
             <input type="submit" value="Create new thread">
                                                    |]
