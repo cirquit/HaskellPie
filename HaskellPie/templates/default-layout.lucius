@@ -138,15 +138,14 @@
     font-family:"Arial", "sans serif";
 }
 
-.simpleCreator {
+.accountLink {
     font-size: 15px;
     font-weight: bold;
-    text-decoration: none;
     color: #F78181;
     font-family:"Arial", "sans serif";
 }
 
-.simpleCreator:hover {
+.accountLink:hover {
     font-size: 15px;
     font-weight: bold;
     text-decoration: none;
@@ -212,6 +211,12 @@ footer{
     margin: 0px 5px 0px 5px;
 }
 
+#mid {
+    background-color: #EEE;
+    min-height:400px;
+    width:100%;
+}
+
 .thread_answer {
     margin: 1em 3em;
     color: #999;
@@ -236,7 +241,7 @@ footer{
 
 
 /* Evaluation tooltip */
-
+/*
 td.tooltips {
   position: relative;
 }
@@ -285,4 +290,65 @@ td:hover.tooltips span {
   -o-transition: all 0.4s ease;
   transition: all 0.4s ease;
   z-index: 999;
+}
+*/
+
+
+/* new threadtable layout */
+
+.threads {
+    background-color: #473D3F;
+    font-family: "Arial";
+    border-left: solid 2px #BBB;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.threads td {
+  padding: 10px 12px 10px 10px;
+  border-bottom: solid 2px #888;
+}
+
+/*.threads td a{
+  padding: 10px 32px 10px 10px;
+  display: block;
+  margin: -10px -32px -10px -10px;
+  text-decoration: none;
+}*/
+.post:hover {
+    background-color: #7A6F6F;
+}
+
+.threadname {
+  font-weight: bold;
+  color: #79BAEC;
+  text-decoration: none;
+  width:50%;
+  text-align: center;
+}
+
+.threadname:hover {
+  font-weight: bold;
+  color: #79BAEC;
+  text-decoration: none;
+}
+
+.username {
+  font-weight: bold;
+  color: orange;
+  text-decoration: none;
+}
+
+.username:hover {
+  font-weight: bold;
+  color: orange;
+  text-decoration: none;
+}
+
+.threadby {
+  color: white;
+}
+
+.update {
+  color: white;
 }

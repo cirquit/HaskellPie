@@ -12,7 +12,6 @@ import Yesod.Auth.BrowserId (authBrowserId)
 import Yesod.Core.Types     (Logger)
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Form.Nic (YesodNic)
-
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have

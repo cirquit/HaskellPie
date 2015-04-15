@@ -1,8 +1,7 @@
 module Widgets where
 
 import Import
-import Helper (formatDateStr, getLatestUpdate, spacesToMinus,
-               cutBy20, isAdmin)
+import Helper (formatDateStr, getLatestUpdate, spacesToMinus)
 
 postWidget :: Enctype -> Widget -> Widget
 postWidget enctype widget =  [whamlet|
@@ -24,8 +23,11 @@ accountLinksW = do
             <a class="login" href=@{SignUpR}> Sign up
                        |]
 
-threadWidget :: ThreadId -> Thread -> Widget
-threadWidget tid thread = do
+threadWidget :: Bool -- current user logged in && has moderator rights
+             -> ThreadId
+             -> Thread
+             -> Widget
+threadWidget isMod tid thread = do
    mnick <- lookupSession "_ID"
    nick <-  case mnick of
               (Just nick) -> return $ nick
@@ -33,17 +35,17 @@ threadWidget tid thread = do
    let enum = [0..]::[Int]
    [whamlet|
         <div .thread_answer>
-            $maybe (Person pnick _ _ _ _) <- threadCreator thread
-                 <a .simpleCreator href=@{UserR pnick}> #{pnick}
+            $maybe pnick <- threadCreator thread
+                 <a .username href=@{UserR pnick}> #{pnick}
             $nothing
-                <span .simpleCreator> Anonymous
+                <span .username> Anonymous
             <span .simpleTime>#{formatDateStr $ show $ threadTime thread}
-            $if (isAdmin mnick)
+            $if isMod
                     <a href=@{EditThreadR tid}> Edit thread
                     <a href=@{DeleteThreadR tid}> Delete thread
             $else
-                $maybe person <- threadCreator thread
-                    $if nick == (personNick person)
+                $maybe pnick <- threadCreator thread
+                    $if (nick == pnick)
                         <a href=@{EditThreadR tid}> Edit thread
                         <a href=@{DeleteThreadR tid}> Delete thread
             <br>
@@ -52,40 +54,41 @@ threadWidget tid thread = do
         $with enum_posts <- (zip enum posts)
             $forall (n, post) <- enum_posts
                 <div .thread_answer>
-                        $maybe (Person pnick _ _ _ _) <- postCreator post
+                        $maybe pnick <- postCreator post
                             <a .simpleCreator href=@{UserR pnick}> #{pnick}
                         $nothing
                             <span .simpleCreator> Anonymous
                         <span .simpleTime> #{formatDateStr $ show $ postTime post}
-                        $if (isAdmin mnick)
+                        $if isMod
                             <a href=@{EditPostR tid n}> Edit
                             <a href=@{DeletePostR tid n}> Delete
                         $else
-                            $maybe person <- postCreator post
-                                $if nick == (personNick person)
+                            $maybe pnick <- postCreator post
+                                $if (nick == pnick)
                                     <a href=@{EditPostR tid n}> Edit
                                     <a href=@{DeletePostR tid n}> Delete
                         <br>
                         <span> #{postContent post}
                           |]
 
-threadListWidget :: [Entity Thread] -> Widget
-threadListWidget threads = [whamlet|
-    <table #threadList>
+
+threadListWidget :: [Entity Thread] -> Int -> Widget
+threadListWidget threads maxlength = [whamlet|
+    <table .threads>
         $forall (Entity id thread) <- threads
-            <tr>
-                $if (length (threadTitle thread)) > 20
-                    <td .tooltips>
-                        <a .threadLink href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> #{cutBy20 $ threadTitle thread}
-                        <span> #{threadTitle thread}
-                $else
-                    <td>
-                        <a .threadLink href=@{ThreadR $ spacesToMinus $ threadTitle thread} style="margin:10px;"> #{cutBy20 $ threadTitle thread}
-                <td>
-                    $maybe (Person nick _ _ _ _)<- threadCreator thread
-                         <a .simpleCreator href=@{UserR nick}> #{nick}
+            <tr .post>
+                <td .threadname>
+                    $if (length (threadTitle thread)) > maxlength
+                        <a .threadname href=@{ThreadR $ spacesToMinus $ threadTitle thread}> #{take maxlength $ threadTitle thread}...
+                    $else
+                        <a .threadname href=@{ThreadR $ spacesToMinus $ threadTitle thread}> #{threadTitle thread}
+                <td .threadby>
+                    by
+                <td .username>
+                    $maybe nick <- threadCreator thread
+                         <a .username href=@{UserR nick}> #{nick}
                     $nothing
-                        <span .simpleCreator> Anonymous
-                <td>
-                    <span .simpleTime> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
+                        <span> Anonymous
+                <td .update>
+                    <span> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
 |]

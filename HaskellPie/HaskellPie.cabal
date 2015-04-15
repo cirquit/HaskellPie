@@ -37,6 +37,7 @@ library
                      Handler.EditThread
                      Handler.User
                      Handler.NoPermissions
+                     Handler.CreateThread
                      Widgets
                      CustomForms
                      Helper
