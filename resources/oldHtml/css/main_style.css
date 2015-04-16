@@ -4,7 +4,7 @@ body {
 }
 
 #wrapper {
-    width:100%;
+    min-width:1128px;
     margin: 0 auto 0 auto;
 }
 
@@ -12,7 +12,7 @@ body {
     position: relative;
     width: 100%;
     height: 164px;
-    background-color: #9DB68C;
+    background-color: #779ECB;
 }
 
 #logo {
@@ -23,7 +23,7 @@ body {
 
 .login {
     text-decoration: none;
-    color: white;
+    color: #333;
     font-family: Arial, Helvetica, "sans serif";
     font-weight: bolder;
     position: absolute;
@@ -33,7 +33,7 @@ body {
 
 .signup {
     text-decoration: none;
-    color: white;
+    color: #333;
     font-family: Arial, Helvetica, "sans serif";
     font-weight: bolder;
     position: absolute;
@@ -42,11 +42,11 @@ body {
 }
 
 .login:hover {
-     color: #999;
+     color: #CCC;
 }
 
 .signup:hover {
-     color: #999;
+     color: #CCC;
 }
 
 
@@ -84,7 +84,7 @@ body {
 }
 
 .menubar ul li:hover {
-  background:#7A6F6F;
+  background:#666;
 }
 
 #slice_container {
