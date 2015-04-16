@@ -15,7 +15,7 @@ getUserR nick = do
                          True -> infoList >> postWidget enctype widget
                          (_)  -> infoList
         headline = nick ++ pack "'s Profile"
-        rightWidget = [whamlet|<span> #{nick}'s threads|] >> threadListWidget personThreads 15
+        rightWidget = threadListWidget personThreads 15
     defaultLayout $(widgetFile "left-right-layout")
 
 
@@ -53,7 +53,7 @@ updatePermissionsMForm (Person nick password email info permissions) token = do
     let result = Person nick password email info <$> permissionsResult
         widget = [whamlet|
             #{token}
-                <li> Permissions: ^{fvInput permissionsView}
+                <span> Permissions: ^{fvInput permissionsView}
             <input type=submit value="Update permissions">
                  |]
     return (result, widget)

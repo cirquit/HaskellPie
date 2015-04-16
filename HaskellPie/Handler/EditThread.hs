@@ -1,7 +1,7 @@
 module Handler.EditThread where
 
 import Import
-import Helper (getThreadPermissions, spacesToMinus, isModeratorBySession)
+import Helper
 import CustomForms (threadMForm)
 import Widgets (threadWidget, postWidget, accountLinksW)
 
@@ -12,9 +12,11 @@ getEditThreadR tid = do
         isMod <- isModeratorBySession
         return (t, isMod)
     auth <- getThreadPermissions thread
-    case auth of
+    case (auth || isMod) of
         True -> do
-            (widget, enctype) <- generateFormPost $ threadMForm "Update thread" (Just $ threadTitle thread) (Just $ threadContent thread)
+            equation <- liftIO $ createMathEq
+            (widget, enctype) <- generateFormPost $ threadMForm equation "Update thread" (Just $ threadTitle thread) (Just $ threadContent thread)
+            setSession "captcha" (eqResult equation)
             let headline = threadTitle thread
                 leftWidget = threadWidget isMod tid thread
                 rightWidget = postWidget enctype widget
@@ -23,19 +25,29 @@ getEditThreadR tid = do
 
 postEditThreadR :: ThreadId -> Handler Html
 postEditThreadR tid = do
+    captcha <- getCaptchaBySession
+    equation <- liftIO $ createMathEq
+    setSession "captcha" (eqResult equation)
     (thread, isMod) <- runDB $ do
         t <- get404 tid
         isMod <- isModeratorBySession
         return (t, isMod)
     auth <- getThreadPermissions thread
-    case auth of
+    case (auth || isMod) of
         True  -> do
-            ((result, widget),enctype)<- runFormPost $ threadMForm "Update thread" (Just $ threadTitle thread) (Just $ threadContent thread)
+            ((result, widget),enctype)<- runFormPost $ threadMForm equation "Update thread" (Just $ threadTitle thread) (Just $ threadContent thread)
             case result of
                 (FormSuccess mthread)   -> do
                     let newThread = mthread (threadCreator thread)
-                    runDB $ replace tid $ newThread {threadPosts = (threadPosts thread), threadCreator = (threadCreator thread)}
-                    redirect $ ThreadR (spacesToMinus $ threadTitle newThread)
+                    case (threadCaptcha newThread) == captcha of
+                        True -> do
+                            runDB $ replace tid $ newThread {threadPosts = (threadPosts thread), threadCreator = (threadCreator thread)}
+                            redirect $ ThreadR (spacesToMinus $ threadTitle newThread)
+                        False -> do
+                            let headline = threadTitle thread
+                                leftWidget   = threadWidget isMod tid thread
+                                rightWidget  = [whamlet|<span .simpleBlack> Sorry, the captcha is wrong|] >> postWidget enctype widget
+                            defaultLayout $(widgetFile "left-right-layout")
                 (FormFailure (err:_)) -> do
                     let headline    = threadTitle thread
                         leftWidget  = threadWidget isMod tid thread

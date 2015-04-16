@@ -1,8 +1,6 @@
 module Helper where
 
-import Prelude (read)
-import Import hiding (last)
-import Data.List (last)
+import Import
 import qualified Data.Text as T
 
 data LoginData = LoginData {nick :: Text, pw :: Text}
@@ -10,122 +8,20 @@ data LoginData = LoginData {nick :: Text, pw :: Text}
 dupe :: a -> (a,a)
 dupe x = (x,x)
 
-passwordsEntityMatch :: Text -> Maybe (Entity Person) -> Bool
-passwordsEntityMatch pw (Just (Entity _ person)) = (personPassword person) == pw
-passwordsEntityMatch _  _                        = False
-
-passwordsFormMatch ::  Person -> FormResult Text -> Bool
-passwordsFormMatch (Person _ curPw _ _ _) (FormSuccess newPw) = newPw == curPw
-passwordsFormMatch _  _                                       = False
-
 spacesToMinus :: Text -> Text
 spacesToMinus ys = T.map (\x -> if x == ' ' then '-' else x) ys
 
 minusToSpaces :: Text -> Text
 minusToSpaces ys = T.map (\x -> if x == '-' then ' ' else x) ys
 
-addPost :: Maybe [Post] -> Post -> Maybe [Post]
-addPost (Just xs) x = Just (xs ++ [x])
-addPost _         x = Just [x]
-
-
-dateFormat :: String
-dateFormat = "%e %b %Y"
-
-dateTimeFormat :: String
-dateTimeFormat = "%e %b %y %H:%M:%S"
-
-formatDateStr :: String -> String
-formatDateStr dateString = formatTime defaultTimeLocale dateTimeFormat t
-    where
-        t :: UTCTime
-        t = read dateString
-
-
-getLatestUpdate :: Thread -> UTCTime
-getLatestUpdate (Thread _ _ (Just posts) time _ _) = lasts posts postTime time
-getLatestUpdate (Thread _ _ _ time _ _)            = time
-
-lasts :: [a] -> (a -> b) -> b -> b
-lasts [] _ ifEmpty = ifEmpty
-lasts l  f _       = f $ last l
-
-nickPersonMatch :: (Maybe Text, Maybe Person) -> Bool
-nickPersonMatch ((Just nick),(Just (Person pnick _ _ _ _))) = nick == pnick
-nickPersonMatch _                                           = False
-
--- getPostByIndex :: Thread -> Int -> Maybe Post
--- getPostByIndex (Thread _ _ Nothing _ _ _)   _ = Nothing
--- getPostByIndex (Thread _ _ (Just ps) _ _ _) i =
---     case splitAt i ps of
---       (_, [])         -> Nothing
---       ([], _) | i < 0 -> Nothing
---       (_,(y:_))       -> Just y
-
+updatePosts :: Maybe [Post] -> Post -> Maybe [Post]
+updatePosts (Just xs) x = Just (xs ++ [x])
+updatePosts _         x = Just [x]
 
 getPostByIndex :: Thread -> Int -> Maybe Post
-getPostByIndex (Thread _ _ Nothing   _ _ _) _ = Nothing
-getPostByIndex (Thread _ _ (Just ps) _ _ _) i = lookup i indexedPosts
-    where indexedPosts = zip [1..] ps
-
-
-
-getPostPermissions :: MonadHandler m => Thread -> Int -> m Bool
-getPostPermissions thread n = do
-    mnick <- lookupSession "_ID"
-    let mpost = getPostByIndex thread n
-    case isAdmin mnick of
-        True -> return True
-        (_)  -> case (mnick, mpost) of
-                    (Just nick, Just (Post _ _ (Just pnick))) -> return $ nick == pnick
-                    (_, _)                                    -> return False
-
-getThreadPermissions :: MonadHandler m => Thread -> m Bool
-getThreadPermissions thread = do
-    mnick <- lookupSession "_ID"
-    case isAdmin mnick of
-        True -> return True
-        (_)    -> case (mnick, thread) of
-                  (Just nick, (Thread _ _ _ _ _ (Just pnick))) -> return $ (nick == pnick)
-                  (_, _)                                       -> return False
+getPostByIndex (Thread _ _ Nothing   _ _ _ _) _ = Nothing
+getPostByIndex (Thread _ _ (Just ps) _ _ _ _) i = lookup i indexedPosts
+    where indexedPosts = zip [0..] ps
 
 deleteByIndex :: [a] -> Int -> [a]
 deleteByIndex xs i = take i xs ++ drop (i+1) xs
-
-getPersonBySession:: MonadHandler m => ReaderT SqlBackend m (Maybe Text)
-getPersonBySession = do
-    mnick <- lookupSession "_ID"
-    case mnick of
-        (Just nick) -> do
-            mperson <- getBy $ UniqueNick nick
-            case mperson of
-               (Just (Entity _ person)) -> return $ Just $ personNick person
-               (_)               -> return $ Nothing
-        (_)           -> return $ Nothing
-
-isAdminLoggedIn :: (MonadHandler m) => m Bool
-isAdminLoggedIn = do
-    mnick <- lookupSession "_ID"
-    return $ isAdmin mnick
-
---isModeratorBySession = do
-
-hasModRights :: Int -> Bool
-hasModRights i = i < 3
-
-isAdmin :: Maybe Text -> Bool
-isAdmin (Just "rewrite") = True
-isAdmin (Just "Allora")  = True
-isAdmin _                = False
-
-isModeratorBySession :: MonadHandler m => ReaderT SqlBackend m Bool
-isModeratorBySession = do
-    mnick <- lookupSession "_ID"
-    case (isAdmin mnick, mnick) of
-        (True, _)         -> return True
-        (_, (Just nick)) -> do
-            mperson <- getBy $ UniqueNick nick
-            case mperson of
-                (Just (Entity _ (Person _ _ _ _ permissions))) -> return $ permissions < 3
-                (_)                                            -> return False
-        (_,_)            -> return False

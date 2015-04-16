@@ -127,11 +127,6 @@
     font-family:"Arial", "sans serif";
 }
 
-.simpleTitle {
-    font-size: 30px;
-    color: #473D3F;
-    font-family:"Arial", "sans serif";
-}
 
 .simpleTime {
     font-size: 15px;
@@ -187,10 +182,13 @@ footer{
 }
 
 #title {
-    width: 95%;
-    height: 40px;
-    margin: 10px 0px 10px 20px;
-    text-align: center;
+    padding: 0px 5px 0px 5px;
+    text-align: left;
+    word-wrap: break-word;
+    clear: both;
+    font-size: 30px;
+    color: #473D3F;
+    font-family:"Arial", "sans serif";
 }
 
 #left {
@@ -222,6 +220,7 @@ footer{
     color: #999;
     border-left: 2px solid #999;
     padding-left: 1em;
+    word-spacing: break-word;
 }
 
 #main_content {
@@ -236,9 +235,6 @@ footer{
     color: #473D3F;
     font-family:"Arial", "sans serif";
 }
-
-
-
 
 /* Evaluation tooltip */
 /*
@@ -309,46 +305,59 @@ td:hover.tooltips span {
   border-bottom: solid 2px #888;
 }
 
-/*.threads td a{
+.threads td a{
   padding: 10px 32px 10px 10px;
   display: block;
   margin: -10px -32px -10px -10px;
   text-decoration: none;
-}*/
+}
+
 .post:hover {
     background-color: #7A6F6F;
 }
 
 .threadname {
   font-weight: bold;
-  color: #79BAEC;
+  color: #58B07D;
   text-decoration: none;
-  width:50%;
-  text-align: center;
 }
 
 .threadname:hover {
   font-weight: bold;
-  color: #79BAEC;
+  color: #58B07D;
   text-decoration: none;
 }
 
 .username {
   font-weight: bold;
-  color: orange;
+  color: #E87435;
   text-decoration: none;
 }
 
 .username:hover {
   font-weight: bold;
-  color: orange;
+  color: #E87435;
   text-decoration: none;
 }
 
 .threadby {
   color: white;
+  text-decoration: none;
 }
 
 .update {
   color: white;
+  text-decoration: none;
+
+}
+
+.threadby:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.update:hover {
+  color: white;
+  text-decoration: none;
+
 }

@@ -27,12 +27,14 @@ Thread
     posts [Post] Maybe
     time UTCTime default=CURRENT_TIME
     lastUpdate UTCTime default=CURRENT_TIME
+    captcha Int
     creator Text Maybe
     UniqueTitle title
     deriving
 Post
     content Html
     time UTCTime default=CURRENT_TIME
+    captcha Int
     creator Text Maybe
     deriving
 -- By default this file is used in Model.hs (which is imported by Foundation.hs)

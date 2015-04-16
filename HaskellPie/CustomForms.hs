@@ -2,6 +2,7 @@ module CustomForms where
 
 import Import
 import Yesod.Form.Nic (nicHtmlField)
+import Helper
 
 -- | Custom Int field that doesn't allow number below 0
 unsignedIntField :: ( RenderMessage (HandlerSite m) FormMessage
@@ -83,41 +84,44 @@ updatePasswordField oldpw = Field
     }
 
 
-postMForm :: Text -> Maybe Html -> Form (Maybe Text -> Post)
-postMForm text mHTML token  = do
-  time <- liftIO $ getCurrentTime
-  (contentResult, contentView) <- mreq nicHtmlField "" mHTML
-  let post = Post <$> contentResult <*> pure time
-      widget = [whamlet|
-              #{token}
-                   ^{fvInput contentView}
-                  <input type=submit value=#{text}>
-                  <br>
-              <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
-              <br>
-              <div style="width:100%; height:30px;">
-                <label style="float:left;"> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
-                <label style="float:right;"> <a href=lpaste.net> For larger files </a>
-               |] >> toWidget [lucius|
-                       ##{fvId contentView} {
-                           width:100%;
-                           height:200px;
-                       }
-                                |]
-  return (post, widget)
+postMForm :: MathEquation-> Text -> Maybe Html -> Form (Maybe Text -> Post)
+postMForm equation buttontext mHTML token  = do
+    time <- liftIO $ getCurrentTime
+    (contentResult, contentView) <- mreq nicHtmlField "" mHTML
+    (captchaResult, captchaView) <- mreq intField "" Nothing
+    let post = Post <$> contentResult <*> pure time <*> captchaResult
+        widget = [whamlet|
+                #{token}
+                     ^{fvInput contentView}
+                      <span> What is #{show $ x equation} #{function equation} #{show $ y equation} = ^{fvInput captchaView} // should be #{eqResult equation}
+                    <input type=submit value=#{buttontext}>
+                    <br>
+                <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
+                <br>
+                <div style="width:100%; height:30px;">
+                  <label style="float:left;"> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
+                  <label style="float:right;"> <a href=lpaste.net> For larger files </a>
+                 |] >> toWidget [lucius|
+                         ##{fvId contentView} {
+                             width:100%;
+                             height:200px;
+                         }
+                                  |]
+    return (post, widget)
 
-
-threadMForm :: Text -> Maybe Text -> Maybe Html -> Form (Maybe Text -> Thread)
-threadMForm text mTitle mHTML token = do
+threadMForm :: MathEquation -> Text -> Maybe Text -> Maybe Html -> Form (Maybe Text -> Thread)
+threadMForm equation buttontext mTitle mHTML token = do
     time <- liftIO $ getCurrentTime
     (titleResult, titleView) <- mreq (lengthTextField MsgSubjectError) "" mTitle
     (contentResult, contentView) <- mreq nicHtmlField "" mHTML
-    let thread = Thread <$> titleResult <*> contentResult <*> (pure Nothing) <*> (pure time) <*> (pure time)
+    (captchaResult, captchaView) <- mreq intField "" Nothing
+    let thread = Thread <$> titleResult <*> contentResult <*> (pure Nothing) <*> (pure time) <*> (pure time) <*> captchaResult
         widget = [whamlet|
             #{token}
-                ^{fvInput titleView}
-                ^{fvInput contentView}
-                <input type=submit value="#{text}">
+                  ^{fvInput titleView}
+                  ^{fvInput contentView}
+                  <span> What is #{show $ x equation} #{function equation} #{show $ y equation} = ^{fvInput captchaView} // should be #{eqResult equation}
+                <input type=submit value="#{buttontext}">
             <br>
             <pre> Edit HTML -> &lt;pre&gt; Markup code goes here! &lt;/pre&gt; </pre>
             <label> <a href=http://www.simplehtmlguide.com/text.php style="margin:2px;"> Some how-to use HTML tags </a>
@@ -132,3 +136,5 @@ threadMForm text mTitle mHTML token = do
                        }
                                 |]
     return (thread, widget)
+
+

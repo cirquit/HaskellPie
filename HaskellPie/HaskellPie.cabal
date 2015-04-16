@@ -41,6 +41,9 @@ library
                      Widgets
                      CustomForms
                      Helper
+                     Time
+                     Captcha
+                     Authentification
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -102,6 +105,7 @@ library
                  , time
                  , pwstore-fast                  >=2.4.4
                  , old-locale                    >=1.0.0.6
+                 , random >=1.0.1.1
 
 executable         HaskellPie
     if flag(library-only)
@@ -150,3 +154,4 @@ test-suite test
                  , classy-prelude-yesod
                  , pwstore-fast                  >=2.4.4
                  , old-locale                    >=1.0.0.6
+                 , random >=1.0.1.1

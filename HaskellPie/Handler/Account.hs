@@ -17,7 +17,7 @@ getAccountR = do
                     (widget, enctype) <- generateFormPost $ updateAccountInfoMForm person
                     let headline = "You are logged in " ++ nick ++ "!"
                         leftWidget = postWidget enctype widget
-                        rightWidget = [whamlet| <span> These are your threads|] >> threadListWidget personThreads 15
+                        rightWidget = threadListWidget personThreads 15
                     defaultLayout $(widgetFile "left-right-layout")
                 (_)                      -> do
                     deleteSession "_ID"

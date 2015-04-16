@@ -1,7 +1,7 @@
 module Widgets where
 
 import Import
-import Helper (formatDateStr, getLatestUpdate, spacesToMinus)
+import Helper (formatDateStr, spacesToMinus, calculateDiffTime)
 
 postWidget :: Enctype -> Widget -> Widget
 postWidget enctype widget =  [whamlet|
@@ -55,9 +55,9 @@ threadWidget isMod tid thread = do
             $forall (n, post) <- enum_posts
                 <div .thread_answer>
                         $maybe pnick <- postCreator post
-                            <a .simpleCreator href=@{UserR pnick}> #{pnick}
+                            <a .username href=@{UserR pnick}> #{pnick}
                         $nothing
-                            <span .simpleCreator> Anonymous
+                            <span .username> Anonymous
                         <span .simpleTime> #{formatDateStr $ show $ postTime post}
                         $if isMod
                             <a href=@{EditPostR tid n}> Edit
@@ -68,12 +68,14 @@ threadWidget isMod tid thread = do
                                     <a href=@{EditPostR tid n}> Edit
                                     <a href=@{DeletePostR tid n}> Delete
                         <br>
-                        <span> #{postContent post}
+                        #{postContent post}
                           |]
 
 
 threadListWidget :: [Entity Thread] -> Int -> Widget
-threadListWidget threads maxlength = [whamlet|
+threadListWidget threads maxlength = do
+    cur <- liftIO $ getCurrentTime
+    [whamlet|
     <table .threads>
         $forall (Entity id thread) <- threads
             <tr .post>
@@ -83,12 +85,17 @@ threadListWidget threads maxlength = [whamlet|
                     $else
                         <a .threadname href=@{ThreadR $ spacesToMinus $ threadTitle thread}> #{threadTitle thread}
                 <td .threadby>
-                    by
+                    <a .threadby href=@{ThreadR $ spacesToMinus $ threadTitle thread}> by
                 <td .username>
                     $maybe nick <- threadCreator thread
                          <a .username href=@{UserR nick}> #{nick}
                     $nothing
-                        <span> Anonymous
+                        <a ..username href=@{ThreadR $ spacesToMinus $ threadTitle thread}>Anonymous
+                <td .threadby>
+                    $maybe posts <- threadPosts thread
+                        <a .threadby href=@{ThreadR $ spacesToMinus $ threadTitle thread}> P: #{length posts}
+                    $nothing
+                        <a .threadby href=@{ThreadR $ spacesToMinus $ threadTitle thread}> P: 0
                 <td .update>
-                    <span> Latest update: #{formatDateStr $ show $ getLatestUpdate thread}
-|]
+                    <a .update href=@{ThreadR $ spacesToMinus $ threadTitle thread}>Updated #{calculateDiffTime cur thread} ago
+            |]
