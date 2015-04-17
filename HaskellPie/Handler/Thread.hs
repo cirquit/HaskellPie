@@ -1,48 +1,63 @@
 module Handler.Thread where
 
+import Authentification (isModeratorBySession, getValidNickBySession)
+import Captcha
+import CustomForms (postMForm)
+import Helper (minusToSpaces, updatePosts)
 import Import
 import Widgets (accountLinksW, postWidget, threadWidget)
-import Helper
-import CustomForms (postMForm)
 
 getThreadR :: Text -> Handler Html
-getThreadR text = do
-    setUltDestCurrent
+getThreadR title = do
+
+    -- captcha
     equation <- liftIO $ createMathEq
     setSession "captcha" (eqResult equation)
+
+    -- form
     (widget, enctype) <- generateFormPost $ postMForm equation "Submit post" Nothing
-    let completeTitle = minusToSpaces text
+
+    -- db
     (Entity tid thread, isMod) <- runDB $ do
-        ethread <- getBy404 $ UniqueTitle completeTitle
+        ethread <- getBy404 $ UniqueTitle $ minusToSpaces title
         isMod   <- isModeratorBySession
         return (ethread, isMod)
+
+    -- widgets
+
+    setUltDestCurrent
     let headline = threadTitle thread
         leftWidget = threadWidget isMod tid thread
         rightWidget = postWidget enctype widget
     defaultLayout $(widgetFile "left-right-layout")
 
 postThreadR :: Text -> Handler Html
-postThreadR text = do
+postThreadR title = do
+
+    -- captcha
     equation <- liftIO $ createMathEq
     captcha <- getCaptchaBySession
-    setSession "captcha" (eqResult equation)
-    let completeTitle = minusToSpaces text
-    ((Entity tid thread), isMod) <- runDB $ do
-        ethread <- getBy404 $ UniqueTitle completeTitle
+    setSession "captcha" $ eqResult equation
+
+    -- db
+    ((Entity tid thread), isMod, nick) <- runDB $ do
+        entity <- getBy404 $ UniqueTitle $ minusToSpaces title
         isMod   <- isModeratorBySession
-        return (ethread, isMod)
-    ((result, widget), enctype) <- runFormPost $ postMForm equation "Submit post" Nothing
+        nick    <- getValidNickBySession
+        return (entity, isMod, nick)
+
+    -- form
+    ((result, widget), enctype)  <- runFormPost $ postMForm equation "Submit post" Nothing
     (newWidget, newEnctype) <- generateFormPost $ postMForm equation "Submit post" Nothing
     case result of
         (FormSuccess mpost)   -> do
-            user <- runDB $ getPersonBySession
-            let post = mpost user
+            let post = mpost nick
             case (postCaptcha post) == captcha of
                 True -> do
-                    ((Entity newTid newThread)) <- runDB $ do
-                        (_) <- update tid [ThreadPosts =. (addPost (threadPosts thread) post), ThreadLastUpdate =. (postTime post)]
-                        entity <- getBy404 $ UniqueTitle completeTitle
-                        return (entity)
+                    (Entity newTid newThread) <- runDB $ do
+                        (_) <- update tid [ThreadPosts =. (updatePosts (threadPosts thread) post), ThreadLastUpdate =. (postTime post)]
+                        entity <- getBy404 $ UniqueTitle $ minusToSpaces title
+                        return entity
                     let headline    = threadTitle newThread
                         leftWidget  = threadWidget isMod newTid newThread
                         rightWidget = postWidget newEnctype newWidget

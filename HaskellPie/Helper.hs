@@ -23,5 +23,13 @@ getPostByIndex (Thread _ _ Nothing   _ _ _ _) _ = Nothing
 getPostByIndex (Thread _ _ (Just ps) _ _ _ _) i = lookup i indexedPosts
     where indexedPosts = zip [0..] ps
 
+replacePostByIndex :: Thread -> Post -> Int -> Thread
+replacePostByIndex t@(Thread _ _ Nothing _ _ _ _) _ _       = t
+replacePostByIndex t@(Thread _ _ (Just ps) _ _ _ _) new_p i =
+    case splitAt i ps of
+      (_, [])         -> t
+      ([], _) | i < 0 -> t
+      (xs,(_:ys)) -> t { threadPosts = Just $ xs ++ (new_p:ys) }
+
 deleteByIndex :: [a] -> Int -> [a]
 deleteByIndex xs i = take i xs ++ drop (i+1) xs

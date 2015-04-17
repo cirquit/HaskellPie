@@ -1,19 +1,23 @@
 module Handler.DeletePost where
 
+import Authentification (getPostPermissions, isModeratorBySession)
+import Helper (deleteByIndex)
 import Import
-import Helper (getPostPermissions, deleteByIndex, isModeratorBySession)
 
 getDeletePostR :: ThreadId -> Int ->  Handler Html
 getDeletePostR tid n = redirectToPost $ DeletePostR tid n
 
 postDeletePostR :: ThreadId -> Int ->  Handler Html
 postDeletePostR tid n = do
+
+    -- db & auth
     (thread, isMod) <- runDB $ do
-        t <- get404 tid
-        isM <- isModeratorBySession
-        return (t, isM)
-    auth <- getPostPermissions thread n
-    case (auth || isMod) of
+        t     <- get404 tid
+        isMod <- isModeratorBySession
+        return (t, isMod)
+    (isAuthor,_) <- getPostPermissions thread n
+
+    case (isAuthor || isMod) of
         True -> do
             runDB $ replace tid (removePost thread n)
             redirectUltDest HomeR

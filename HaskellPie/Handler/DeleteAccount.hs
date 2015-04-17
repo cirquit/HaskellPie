@@ -1,73 +1,47 @@
 module Handler.DeleteAccount where
 
+import Authentification (passwordsFormMatch, getValidPersonBySession)
 import Import
-import Widgets (accountLinksW)
-import Helper (passwordsFormMatch)
+import Widgets (accountLinksW, postWidget)
 
 getDeleteAccountR :: Handler Html
 getDeleteAccountR = do
-    mnick <- lookupSession "_ID"
-    case mnick of
-        (Just nick) -> do
-            mperson <- runDB $ getBy $ UniqueNick nick
-            case mperson of
-                (Just (Entity _ person)) -> do
-                    (widget, enctype) <- generateFormPost $ confirmPasswordMForm $ personPassword person
-                    let content = [whamlet|
-                        <div style="margin 30px 0px 0px 15px">
-                            <span class=simpleBlack> Gonna delete u bro'
-                            <table>
-                                <tr>
-                                    <form method=post enctype=#{enctype}>
-                                        ^{widget}
-                                  |]
-                    defaultLayout $(widgetFile "homepage")
-                (_)                      -> do
-                    setUltDestCurrent
-                    deleteSession "_ID"
-                    redirect LogInR
-        (_)         -> do
+
+    -- db
+    mperson <- runDB $ getValidPersonBySession
+
+    -- form
+    case mperson of
+        (Just (_,person)) -> do
+            (widget, enctype) <- generateFormPost $ confirmPasswordMForm $ personPassword person
+            let content = postWidget enctype widget
+            defaultLayout $(widgetFile "homepage")
+        (_)               -> do
             setUltDestCurrent
+            deleteSession "_ID"
             redirect LogInR
 
 
 postDeleteAccountR :: Handler Html
 postDeleteAccountR = do
-    mnick <- lookupSession "_ID"
-    case mnick of
-        (Just nick) -> do
-            mperson <- runDB $ getBy $ UniqueNick nick
-            case mperson of
-                (Just (Entity pid person)) -> do
-                    ((res, widget), enctype) <- runFormPost $ confirmPasswordMForm $ personPassword person
-                    case res of
-                        (passwordsFormMatch person -> True) -> do
-                            (_) <- runDB $ delete pid
-                            deleteSession "_ID"
-                            redirect LogInR
-                        (FormFailure (err:_))           -> do
-                            let content = [whamlet|
-                                <div style="margin 30px 0px 0px 15px">
-                                    <span class=simpleBlack> #{err}
-                                    <table>
-                                        <tr>
-                                            <form method=post enctype=#{enctype}>
-                                                ^{widget}
-                                          |]
-                            defaultLayout $(widgetFile "homepage")
-                        (_)                           -> do
-                            let content = [whamlet|
-                                <div style="margin 30px 0px 0px 15px">
-                                    <span class=simpleBlack> Something went wrong, please try again
-                                    <table>
-                                        <tr>
-                                            <form method=post enctype=#{enctype}>
-                                                ^{widget}
-                                          |]
-                            defaultLayout $(widgetFile "homepage")
-                (_)                        -> do
+    -- db
+    mperson <- runDB $ getValidPersonBySession
+
+    -- form
+    case mperson of
+        (Just (pid, person)) -> do
+            ((res, widget), enctype) <- runFormPost $ confirmPasswordMForm $ personPassword person
+            case res of
+                (passwordsFormMatch person -> True) -> do
+                    (_) <- runDB $ delete pid
                     deleteSession "_ID"
                     redirect LogInR
+                (FormFailure (err:_))           -> do
+                    let content = [whamlet| <span .simpleBlack> #{err} |] >> postWidget enctype widget
+                    defaultLayout $(widgetFile "homepage")
+                (_)                           -> do
+                    let content = [whamlet| <span .simpleBlack> Something went wrong, please try again |] >> postWidget enctype widget
+                    defaultLayout $(widgetFile "homepage")
         (_)       -> do
             setUltDestCurrent
             redirect LogInR

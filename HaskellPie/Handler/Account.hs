@@ -1,58 +1,57 @@
 module Handler.Account where
 
+import Authentification (getValidPersonBy404Session)
+import CustomForms (updatePasswordField)
 import Import
 import Widgets (accountLinksW, postWidget, threadListWidget)
-import CustomForms (updatePasswordField)
 import Helper (dupe)
 
 getAccountR :: Handler Html
 getAccountR = do
-    mnick <- lookupSession "_ID"
-    case mnick of
-        (Just nick) -> do
-            mperson <- runDB $ getBy $ UniqueNick nick
-            case mperson of
-                (Just (Entity _ person)) -> do
-                    personThreads <- runDB $ selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
-                    (widget, enctype) <- generateFormPost $ updateAccountInfoMForm person
-                    let headline = "You are logged in " ++ nick ++ "!"
-                        leftWidget = postWidget enctype widget
-                        rightWidget = threadListWidget personThreads 15
-                    defaultLayout $(widgetFile "left-right-layout")
-                (_)                      -> do
-                    deleteSession "_ID"
-                    redirect LogInR
-        (_)         -> redirect LogInR
+
+    -- db & auth
+    (person, personThreads) <- runDB $ do
+        (Just (_,person)) <- getValidPersonBy404Session
+        pThreads <- selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
+        return (person, pThreads)
+
+    -- form
+    (widget, enctype) <- generateFormPost $ updateAccountInfoMForm person
+
+    -- widgets
+    let headline = "You are logged in!" :: Text
+        leftWidget = postWidget enctype widget
+        rightWidget = threadListWidget personThreads 15
+    defaultLayout $(widgetFile "left-right-layout")
 
 postAccountR :: Handler Html
 postAccountR = do
-    mnick <- lookupSession "_ID"
-    case mnick of
-        (Just nick)-> do
-            mperson <- runDB $ getBy $ UniqueNick nick
-            case mperson of
-                (Just (Entity pid person)) -> do
-                    personThreads <- runDB $ selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
-                    ((res, widget), enctype) <- runFormPost $ updateAccountInfoMForm person
-                    case res of
-                        (FormSuccess (Person _ pw email info permissions)) -> do
-                            (_) <- runDB $ update pid $ [PersonPassword =. pw, PersonEmail =. email, PersonInfo =. info, PersonPermission =. permissions]
-                            let headline = "Your information was updated!" :: Text
-                                leftWidget = postWidget enctype widget
-                                rightWidget = [whamlet| <span> These are your threads|] >> threadListWidget personThreads 15
-                            defaultLayout $(widgetFile "left-right-layout")
-                        (FormFailure (err:_))   -> do
-                            let headline = err
-                                leftWidget = postWidget enctype widget
-                                rightWidget = threadListWidget personThreads 15
-                            defaultLayout $(widgetFile "left-right-layout")
-                        (_)                     -> do
-                            let headline = "Something went wrong, please try again." :: Text
-                                leftWidget = postWidget enctype widget
-                                rightWidget = threadListWidget personThreads 15
-                            defaultLayout $(widgetFile "left-right-layout")
-                (_) -> deleteSession "_ID" >>  redirect LogInR
-        (_)        -> redirect LogInR
+
+    -- db & auth
+    (pid, person, personThreads) <- runDB $ do
+        (Just (pid, person)) <- getValidPersonBy404Session
+        pThreads <- selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
+        return (pid, person, pThreads)
+
+    -- form
+    ((res, widget), enctype) <- runFormPost $ updateAccountInfoMForm person
+    case res of
+        (FormSuccess (Person _ pw email info permissions)) -> do
+            (_) <- runDB $ update pid $ [PersonPassword =. pw, PersonEmail =. email, PersonInfo =. info, PersonPermission =. permissions]
+            let headline = "Your information was updated!" :: Text
+                leftWidget = postWidget enctype widget
+                rightWidget = [whamlet| <span> These are your threads|] >> threadListWidget personThreads 15
+            defaultLayout $(widgetFile "left-right-layout")
+        (FormFailure (err:_))   -> do
+            let headline = err
+                leftWidget = postWidget enctype widget
+                rightWidget = threadListWidget personThreads 15
+            defaultLayout $(widgetFile "left-right-layout")
+        (_)                     -> do
+            let headline = "Something went wrong, please try again." :: Text
+                leftWidget = postWidget enctype widget
+                rightWidget = threadListWidget personThreads 15
+            defaultLayout $(widgetFile "left-right-layout")
 
 
 updateAccountInfoMForm :: Person -> Form Person

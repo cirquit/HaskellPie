@@ -1,14 +1,16 @@
 module Handler.CreateThread where
 
 
+import Authentification (getValidNickBySession)
+import Captcha
+import CustomForms (threadMForm)
+import Helper (spacesToMinus)
 import Import
 import Widgets (accountLinksW, postWidget)
-import CustomForms (threadMForm)
-import Captcha (createMathEq, getCaptchaBySession)
-import Authentification (getValidNickBySession)
 
 getCreateThreadR :: Handler Html
 getCreateThreadR = do
+
     -- captcha
     equation <- liftIO $ createMathEq
     setSession "captcha" $ eqResult equation
@@ -24,6 +26,7 @@ getCreateThreadR = do
 
 postCreateThreadR :: Handler Html
 postCreateThreadR = do
+
     -- captcha
     equation <- liftIO $ createMathEq
     captcha <- getCaptchaBySession
@@ -36,10 +39,11 @@ postCreateThreadR = do
     ((result, widget), enctype) <- runFormPost $ threadMForm equation "Create thread" Nothing Nothing
     case result of
         (FormSuccess mthread) -> do
-            mtitle <- runDB $ do
-                    mtitle <- getBy $ UniqueTitle $ threadTitle $ mthread Nothing
-                    user   <- getValidNickBySession
+            (mtitle, user) <- runDB $ do
+                mtitle <- getBy $ UniqueTitle $ threadTitle $ mthread Nothing
+                user   <- getValidNickBySession
                 return (mtitle, user)
+            let thread = mthread user
             case (mtitle, (threadCaptcha thread == captcha)) of
                 (Nothing, True) -> do
                     (_) <- runDB $ insert thread

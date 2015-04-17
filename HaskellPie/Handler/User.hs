@@ -1,17 +1,25 @@
 module Handler.User where
 
+import Authentification (isAdminLoggedIn)
 import Import
-import Helper (isAdminLoggedIn)
 import Widgets (threadListWidget, accountLinksW, postWidget)
 
 getUserR :: Text -> Handler Html
 getUserR nick = do
-    (Entity _ person) <- runDB $ getBy404 $ UniqueNick nick
-    personThreads <- runDB $ selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
+
+    -- db & auth
+    (person, personThreads) <- runDB $ do
+        (Entity _ person) <- getBy404 $ UniqueNick nick
+        pThreads <- selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
+        return (person, pThreads)
+    isAdmin <- isAdminLoggedIn
+
+    -- form
     (widget, enctype) <- generateFormPost $ updatePermissionsMForm person
-    auth <- isAdminLoggedIn
+
+    -- widgets
     let infoList = accountWidget person
-        leftWidget = case auth of
+        leftWidget = case isAdmin of
                          True -> infoList >> postWidget enctype widget
                          (_)  -> infoList
         headline = nick ++ pack "'s Profile"
@@ -21,10 +29,16 @@ getUserR nick = do
 
 postUserR :: Text -> Handler Html
 postUserR nick = do
-    (Entity pid person) <- runDB $ getBy404 $ UniqueNick nick
-    personThreads <- runDB $ selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
-    auth <- isAdminLoggedIn
-    case auth of
+
+    -- db & auth
+    (pid, person, personThreads) <- runDB $ do
+        (Entity pid person) <- getBy404 $ UniqueNick nick
+        personThreads <- selectList [ThreadCreator ==. (Just $ personNick person)] [Desc ThreadLastUpdate]
+        return (pid, person, personThreads)
+    isAuthor <- isAdminLoggedIn
+
+    -- form
+    case isAuthor of
         True -> do
             ((res, widget),enctype) <- runFormPost $ updatePermissionsMForm person
             case res of

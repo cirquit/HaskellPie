@@ -1,7 +1,8 @@
 module Widgets where
 
+import Helper (spacesToMinus)
 import Import
-import Helper (formatDateStr, spacesToMinus, calculateDiffTime)
+import Time (formatDateStr, calculateDiffTime)
 
 postWidget :: Enctype -> Widget -> Widget
 postWidget enctype widget =  [whamlet|

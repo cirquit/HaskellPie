@@ -2,7 +2,7 @@ module CustomForms where
 
 import Import
 import Yesod.Form.Nic (nicHtmlField)
-import Helper
+import Captcha
 
 -- | Custom Int field that doesn't allow number below 0
 unsignedIntField :: ( RenderMessage (HandlerSite m) FormMessage
