@@ -16,10 +16,6 @@ getEditPostR tid n = do
         isMod  <- isModeratorBySession
         return (t, isMod)
     (isAuthor, mpost) <- getPostPermissions thread n
-    liftIO $ do
-        putStrLn $ ("auth: " :: Text) ++ (pack (show isAuthor))
-        putStrLn $ ("isMod: " :: Text) ++ (pack (show isMod))
-        putStrLn $ ("postcaptcha: " :: Text) ++ (maybe ("none" :: Text) (pack . show . postCaptcha) mpost)
 
     case ((isAuthor || isMod), mpost) of
         (True, Just post) -> do

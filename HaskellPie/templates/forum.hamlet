@@ -1,0 +1,16 @@
+<div id="wrapper">
+    <div id="top">
+        <a href=@{HomeR}> <img id="logo" src=@{StaticR images_HaskellpieLogo_svg}>
+        ^{accountLinksW}
+    <div class="menubar">
+        <ul>
+            <li> <a href=@{HomeR}>                  Home </a>
+            <li> <a href=@{TutorialsR}>        Tutorials </a>
+            <li> <a href=@{ForumR} class="active"> Forum </a>
+            <li> <a href=@{ContactR}>            Contact </a>
+    <div id="main_content">
+        <div class="toolbar">
+            <a href=@{CreateThreadR} class="createThreadButton">   New Thread
+            <a href="#" class="searchButton" style="float:right;"> Search
+            <input type="text" placeholder="Forum Search">
+            ^{midWidget}

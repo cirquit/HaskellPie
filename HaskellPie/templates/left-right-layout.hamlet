@@ -5,7 +5,6 @@
     <div class="menubar">
         <ul>
             <li> <a href=@{HomeR}> Home           </a>
-            <li> <a href=@{BlogR}> Blog           </a>
             <li> <a href=@{TutorialsR}> Tutorials </a>
             <li> <a href=@{ForumR}> Forum         </a>
             <li> <a href=@{ContactR}> Contact     </a>

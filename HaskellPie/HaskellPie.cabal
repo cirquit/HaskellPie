@@ -20,7 +20,6 @@ library
                      Settings.StaticFiles
                      Handler.Common
                      Handler.Home
-                     Handler.Blog
                      Handler.Tutorials
                      Handler.Forum
                      Handler.Contact

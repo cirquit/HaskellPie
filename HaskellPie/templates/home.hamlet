@@ -1,0 +1,12 @@
+<div id="wrapper">
+    <div id="top">
+        <a href=@{HomeR}> <img id="logo" src=@{StaticR images_HaskellpieLogo_svg}>
+        ^{accountLinksW}
+    <div class="menubar">
+        <ul>
+            <li> <a href=@{HomeR} class="active"> Home      </a>
+            <li> <a href=@{TutorialsR}>           Tutorials </a>
+            <li> <a href=@{ForumR}>               Forum     </a>
+            <li> <a href=@{ContactR}>             Contact   </a>
+    <div id="main_content">
+        ^{content}

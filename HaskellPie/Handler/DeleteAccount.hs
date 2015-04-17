@@ -15,7 +15,7 @@ getDeleteAccountR = do
         (Just (_,person)) -> do
             (widget, enctype) <- generateFormPost $ confirmPasswordMForm $ personPassword person
             let content = postWidget enctype widget
-            defaultLayout $(widgetFile "homepage")
+            defaultLayout $(widgetFile "home")
         (_)               -> do
             setUltDestCurrent
             deleteSession "_ID"
@@ -38,10 +38,10 @@ postDeleteAccountR = do
                     redirect LogInR
                 (FormFailure (err:_))           -> do
                     let content = [whamlet| <span .simpleBlack> #{err} |] >> postWidget enctype widget
-                    defaultLayout $(widgetFile "homepage")
+                    defaultLayout $(widgetFile "home")
                 (_)                           -> do
                     let content = [whamlet| <span .simpleBlack> Something went wrong, please try again |] >> postWidget enctype widget
-                    defaultLayout $(widgetFile "homepage")
+                    defaultLayout $(widgetFile "home")
         (_)       -> do
             setUltDestCurrent
             redirect LogInR

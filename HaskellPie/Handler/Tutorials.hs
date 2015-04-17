@@ -5,7 +5,10 @@ import Widgets (accountLinksW)
 
 getTutorialsR :: Handler Html
 getTutorialsR = do
-    let headline = "Tutorials" :: Text
-    let leftWidget = [whamlet|<span>|]
-    let rightWidget = [whamlet|<span>|]
-    defaultLayout $(widgetFile "left-right-layout")
+    let content = [whamlet|
+        <div style="text-align:center;">
+            <br>
+            <br>
+            <span> Work in progress...
+                  |]
+    defaultLayout $(widgetFile "tutorials")
