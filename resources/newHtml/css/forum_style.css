@@ -155,7 +155,7 @@ html, body {
 
 .threadname {
     font-weight: bold;
-    color: #FFE58C;
+    color: #FDFD96; 
     width: 600px;
     text-decoration: none;
 }
@@ -327,7 +327,7 @@ td:hover.tooltips span {
     color: white;
 }
 
-.toolbar input {
+.searchBar {
     font-family: "Arial";
     font-weight: bold;
     font-size: 14px;
@@ -339,7 +339,7 @@ td:hover.tooltips span {
     border-width: 1px;
     border-color: #779ECB;
     color: #779ECB;
-    width: 300px;
+    width: 293px;
     padding-left: 7px;
 }
 
@@ -364,22 +364,23 @@ td:hover.tooltips span {
 
 
 .searchButton {
+    float: right;
     background-color:#333;
     border:1px solid #779ecb;
-    display:inline-block;
     color:#779ecb;
     font-family:"Arial";
     font-size:14px;
     font-weight:bolder;
     text-decoration:none;
     line-height: 30px;
-    height: 30px;
+    height: 32px;
     padding: 0 24px;
     margin: 7px 6px 7px 0;
 }
 
 .searchButton:hover {
     background-color:#444;
+    cursor: pointer;
 }
 
 .active {

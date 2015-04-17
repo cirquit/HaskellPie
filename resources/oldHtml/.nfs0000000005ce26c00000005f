@@ -24,7 +24,7 @@
                 <div class="toolbar">
                     <a href="#" class="createThreadButton">New Thread</a>
                     <a href="#" class="createThreadButton" style="float:right;">Search</a>
-                    <input id="search" type="text" placeholder="Forum Search" onkeypress="alert('hi')">
+                    <input type="text" placeholder="Forum Search">
                 </div>
                 <table class="threads">
                     <tr style="border-bottom:solid 8px #666;">

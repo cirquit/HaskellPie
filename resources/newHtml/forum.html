@@ -4,6 +4,13 @@
     <head>
         <title>HaskellPie - Forum</title>
         <link rel="stylesheet" type="text/css" href="css/forum_style.css">
+        <script type="text/javascript">
+            function enterSubmit (event){
+                var keyCode = ('which' in event) ? event.which : event.keyCode;
+                if (keyCode == '13')
+                    document.getElementById('searchForm').submit();
+                }
+        </script>
     </head>
     <body>
         <div id="wrapper">
@@ -23,8 +30,10 @@
             <div id="main_content">
                 <div class="toolbar">
                     <a href="#" class="createThreadButton">New Thread</a>
-                    <a href="#" class="searchButton" style="float:right;">Search</a>
-                    <input type="text" placeholder="Forum Search">
+                    <form method="post" id="searchForm" style="display:inline;">
+                        <input type="submit" value="Search" class="searchButton" id="searchButton">
+                        <input type="text" placeholder="Forum Search" class="searchBar" onkeypress="enterSubmit(event)">
+                    </form>
                 </div>
                 <table class="threads">
                     <tr style="border-bottom:solid 8px #666; width:100%;">
